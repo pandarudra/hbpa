@@ -4,11 +4,11 @@
     "slug": "hbp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo.png",
+    "icon": "./assets/images/horizon-icon.png",
     "scheme": "com.hbplus.app",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/images/logo.png",
+      "image": "./assets/images/horizon-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

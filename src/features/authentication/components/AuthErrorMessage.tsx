@@ -1,22 +1,19 @@
-import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
-import type { AuthErrorCode } from '../types/auth.types';
-import { colors, fonts, rounded, spacing } from '@/constants/theme';
+import React from "react";
+import { View, Text, StyleSheet, Pressable } from "react-native";
+import type { AuthErrorCode } from "../types/auth.types";
+import { colors, fonts, rounded, spacing } from "@/constants/theme";
 
 const ERROR_MESSAGES: Record<AuthErrorCode, string> = {
   DOMAIN_NOT_ALLOWED:
-    'Access restricted. Please login using your official domain email.',
+    "Access restricted. Please login using your official domain email.",
   EMAIL_NOT_VERIFIED:
-    'Your Google email is not verified. Please verify it and try again.',
-  INVALID_TOKEN:
-    'Authentication failed. Please try again.',
+    "Your Google email is not verified. Please verify it and try again.",
+  INVALID_TOKEN: "Authentication failed. Please try again.",
   ACCOUNT_DISABLED:
-    'Your account has been disabled. Please contact your administrator.',
-  NETWORK_ERROR:
-    'Network error. Please check your connection and try again.',
-  CANCELLED: '',
-  UNKNOWN:
-    'An unexpected error occurred. Please try again.',
+    "Your account has been disabled. Please contact your administrator.",
+  NETWORK_ERROR: "Network error. Please check your connection and try again.",
+  CANCELLED: "",
+  UNKNOWN: "An unexpected error occurred. Please try again.",
 };
 
 interface Props {
@@ -36,7 +33,6 @@ export function AuthErrorMessage({ code, message, onDismiss }: Props) {
       accessibilityRole="alert"
     >
       <View style={styles.content}>
-        <View style={styles.errorIndicator} />
         <Text style={styles.text}>{text}</Text>
       </View>
       <Pressable
@@ -53,22 +49,22 @@ export function AuthErrorMessage({ code, message, onDismiss }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     backgroundColor: colors.errorBg,
     borderColor: colors.errorBorder,
     borderWidth: 1,
     borderRadius: rounded.md,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
-    width: '100%',
+    width: "100%",
     gap: spacing.sm,
   },
   content: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing.xs,
   },
   errorIndicator: {
@@ -83,7 +79,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sans,
     fontSize: 13,
     lineHeight: 18,
-    fontWeight: '400',
+    fontWeight: "400",
   },
   dismiss: {
     padding: spacing.xxs,
@@ -91,6 +87,6 @@ const styles = StyleSheet.create({
   dismissText: {
     color: colors.error,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

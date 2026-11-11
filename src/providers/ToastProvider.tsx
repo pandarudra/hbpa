@@ -1,167 +1,165 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useRef,
-  type ReactNode,
-} from 'react';
+import React, { type ReactNode } from 'react';
 import {
+  Platform,
   View,
   Text,
   StyleSheet,
-  Animated,
-  Pressable,
   SafeAreaView,
-  Platform,
+  Pressable,
 } from 'react-native';
+import toast, {
+  Toaster as WebToaster,
+  useToaster,
+  type Toast,
+} from 'react-hot-toast';
 import { colors, fonts, rounded, spacing, shadows } from '@/constants/theme';
 
-export type ToastType = 'success' | 'error' | 'info';
+export { toast };
+export default toast;
 
-export interface ToastOptions {
-  type?: ToastType;
-  title?: string;
-  message: string;
-  duration?: number;
-}
-
-interface ToastContextValue {
-  showToast: (options: ToastOptions) => void;
-  hideToast: () => void;
-}
-
-const ToastContext = createContext<ToastContextValue | null>(null);
-
-export function ToastProvider({ children }: { children: ReactNode }) {
-  const [toast, setToast] = useState<ToastOptions | null>(null);
-  const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(-30)).current;
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  const hideToast = useCallback(() => {
-    Animated.parallel([
-      Animated.timing(opacity, {
-        toValue: 0,
-        duration: 220,
-        useNativeDriver: true,
-      }),
-      Animated.timing(translateY, {
-        toValue: -20,
-        duration: 220,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      setToast(null);
-    });
-  }, [opacity, translateY]);
-
-  const showToast = useCallback(
-    (options: ToastOptions) => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-
-      setToast(options);
-      opacity.setValue(0);
-      translateY.setValue(-30);
-
-      Animated.parallel([
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: 260,
-          useNativeDriver: true,
-        }),
-        Animated.spring(translateY, {
-          toValue: 0,
-          friction: 7,
-          tension: 70,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      const duration = options.duration ?? 4200;
-      timerRef.current = setTimeout(() => {
-        hideToast();
-      }, duration);
+const webToastOptions = {
+  duration: 4000,
+  style: {
+    background: colors.surface,
+    color: colors.ink,
+    border: `1px solid ${colors.hairline}`,
+    borderRadius: `${rounded.lg}px`,
+    padding: `${spacing.sm}px ${spacing.md}px`,
+    fontFamily:
+      "-apple-system, BlinkMacSystemFont, 'Inter', 'AkkuratLL', 'Segoe UI', Roboto, sans-serif",
+    fontSize: '14px',
+    fontWeight: '400',
+    lineHeight: '1.4',
+    boxShadow: '0 8px 24px rgba(57, 34, 30, 0.09)',
+  },
+  success: {
+    duration: 3500,
+    iconTheme: {
+      primary: colors.forest,
+      secondary: colors.sageBg,
     },
-    [opacity, translateY, hideToast],
-  );
+    style: {
+      border: `1px solid ${colors.sagePale}`,
+    },
+  },
+  error: {
+    duration: 4500,
+    iconTheme: {
+      primary: colors.error,
+      secondary: colors.errorBg,
+    },
+    style: {
+      border: `1px solid ${colors.errorBorder}`,
+    },
+  },
+};
+
+/**
+ * Native mobile toaster rendered using React Native primitives,
+ * subscribed to the react-hot-toast headless store.
+ */
+function NativeToaster() {
+  const { toasts } = useToaster();
+  const visibleToasts = toasts.filter((t) => t.visible);
+
+  if (visibleToasts.length === 0) return null;
 
   return (
-    <ToastContext.Provider value={{ showToast, hideToast }}>
-      {children}
-      {toast && (
-        <SafeAreaView pointerEvents="box-none" style={styles.toastWrapper}>
-          <Animated.View
-            style={[
-              styles.toastContainer,
-              {
-                opacity,
-                transform: [{ translateY }],
-              },
-            ]}
-          >
-            {/* Status indicator badge */}
-            <View
-              style={[
-                styles.iconBadge,
-                toast.type === 'error' && styles.iconBadgeError,
-                toast.type === 'success' && styles.iconBadgeSuccess,
-              ]}
-            >
-              {toast.type === 'success' && (
-                <Text style={styles.tickIcon}>✓</Text>
-              )}
-              {toast.type === 'error' && (
-                <Text style={styles.errorIcon}>!</Text>
-              )}
-              {(!toast.type || toast.type === 'info') && (
-                <View style={styles.infoDot} />
-              )}
-            </View>
-
-            {/* Message Body */}
-            <View style={styles.messageBox}>
-              {toast.title && <Text style={styles.title}>{toast.title}</Text>}
-              <Text style={styles.message}>{toast.message}</Text>
-            </View>
-
-            {/* Dismiss action */}
-            <Pressable
-              onPress={hideToast}
-              style={styles.dismissBtn}
-              accessibilityLabel="Dismiss message"
-              hitSlop={8}
-            >
-              <Text style={styles.dismissText}>✕</Text>
-            </Pressable>
-          </Animated.View>
-        </SafeAreaView>
-      )}
-    </ToastContext.Provider>
+    <SafeAreaView pointerEvents="box-none" style={styles.nativeWrapper}>
+      {visibleToasts.map((t) => (
+        <NativeToastItem key={t.id} toast={t} />
+      ))}
+    </SafeAreaView>
   );
 }
 
-export function useToast(): ToastContextValue {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error('useToast must be used within a ToastProvider');
-  }
-  return context;
+function NativeToastItem({ toast: t }: { toast: Toast }) {
+  const isSuccess = t.type === 'success';
+  const isError = t.type === 'error';
+  const messageStr = typeof t.message === 'function' ? '' : String(t.message);
+
+  return (
+    <View style={styles.nativeToast}>
+      <View
+        style={[
+          styles.iconBadge,
+          isSuccess && styles.iconBadgeSuccess,
+          isError && styles.iconBadgeError,
+        ]}
+      >
+        {isSuccess && <Text style={styles.tickIcon}>✓</Text>}
+        {isError && <Text style={styles.errorIcon}>!</Text>}
+        {!isSuccess && !isError && <View style={styles.infoDot} />}
+      </View>
+      <Text style={styles.nativeText}>{messageStr}</Text>
+      <Pressable
+        onPress={() => toast.dismiss(t.id)}
+        hitSlop={8}
+        style={styles.dismissBtn}
+      >
+        <Text style={styles.dismissText}>✕</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+/**
+ * Universal Toaster following DESIGN.md's ex-toast spec:
+ * Uses react-hot-toast's Toaster on Web and a native-rendered fallback on mobile.
+ */
+export function ToastProvider({ children }: { children: ReactNode }) {
+  return (
+    <>
+      {children}
+      {Platform.OS === 'web' ? (
+        <WebToaster position="top-center" toastOptions={webToastOptions} />
+      ) : (
+        <NativeToaster />
+      )}
+    </>
+  );
+}
+
+/**
+ * Hook for backward-compatibility with earlier useToast() callers.
+ * Delegates directly to react-hot-toast.
+ */
+export function useToast() {
+  return {
+    showToast: (options: {
+      type?: 'success' | 'error' | 'info';
+      title?: string;
+      message: string;
+      duration?: number;
+    }) => {
+      const msg = options.title
+        ? `${options.title}: ${options.message}`
+        : options.message;
+
+      if (options.type === 'success') {
+        toast.success(msg, { duration: options.duration });
+      } else if (options.type === 'error') {
+        toast.error(msg, { duration: options.duration });
+      } else {
+        toast(msg, { duration: options.duration });
+      }
+    },
+    hideToast: () => toast.dismiss(),
+  };
 }
 
 const styles = StyleSheet.create({
-  toastWrapper: {
+  nativeWrapper: {
     position: 'absolute',
-    top: Platform.OS === 'web' ? 16 : 10,
+    top: 10,
     left: 0,
     right: 0,
     alignItems: 'center',
     zIndex: 9999,
     paddingHorizontal: spacing.md,
+    gap: spacing.xs,
   },
-  toastContainer: {
+  nativeToast: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,
@@ -211,22 +209,12 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     backgroundColor: colors.stone,
   },
-  messageBox: {
+  nativeText: {
     flex: 1,
-    gap: 2,
-  },
-  title: {
-    fontFamily: fonts.sans,
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.ink,
-    letterSpacing: 0.1,
-  },
-  message: {
     fontFamily: fonts.sans,
     fontSize: 13,
     lineHeight: 18,
-    color: colors.stone,
+    color: colors.ink,
   },
   dismissBtn: {
     padding: spacing.xxs,

@@ -11,48 +11,57 @@ import {
 } from "react-native";
 import config from "@/constants/config";
 import { useAuth } from "@/providers/AuthProvider";
-import { useToast } from "@/providers/ToastProvider";
+import toast from "react-hot-toast";
 import { GoogleSignInButton } from "@/features/authentication/components/GoogleSignInButton";
 import { AuthErrorMessage } from "@/features/authentication/components/AuthErrorMessage";
 import { LoginSuccessAnimation } from "@/features/authentication/components/LoginSuccessAnimation";
+import { HorizonIcon } from "@/components/common/HorizonIcon";
+import { authApi } from "@/features/authentication/services/authApi";
 import type { AppUser } from "@/features/authentication/types/auth.types";
 import { colors, fonts, rounded, spacing, shadows } from "@/constants/theme";
 
 export default function LoginScreen() {
   const { signIn, isLoading, error, clearError } = useAuth();
-  const { showToast } = useToast();
   const { width } = useWindowDimensions();
   const isWide = width > 600;
   const [verifiedUser, setVerifiedUser] = useState<AppUser | null>(null);
 
-  const allowedDomainsList =
+  const [allowedDomains, setAllowedDomains] = useState<string[]>(
     config.allowedDomains.length > 0
-      ? config.allowedDomains.map((d) => `@${d}`).join(", ")
-      : "@hbplus.fit";
+      ? config.allowedDomains
+      : ["hbplus.fit", "outr.ac.in"],
+  );
 
-  // Trigger matching toast on error
+  useEffect(() => {
+    authApi
+      .getDomains()
+      .then((res) => {
+        if (res.domains && res.domains.length > 0) {
+          setAllowedDomains(res.domains);
+        }
+      })
+      .catch(() => {
+        // Fall back gracefully to build-time config
+      });
+  }, []);
+
+  const allowedDomainsList =
+    allowedDomains.length > 0
+      ? allowedDomains.map((d) => `@${d}`).join(", ")
+      : "@hbplus.fit, @outr.ac.in";
+
+  // Trigger matching toast on error via react-hot-toast
   useEffect(() => {
     if (error) {
-      showToast({
-        type: "error",
-        title:
-          error.code === "DOMAIN_NOT_ALLOWED"
-            ? "Domain Restricted"
-            : "Authentication Error",
-        message: error.message,
-      });
+      toast.error(error.message);
     }
-  }, [error, showToast]);
+  }, [error]);
 
   const handleSignIn = async () => {
     await signIn(async (user: AppUser) => {
       setVerifiedUser(user);
       const userDomain = user.email ? user.email.split("@")[1] : "";
-      showToast({
-        type: "success",
-        title: "Domain Verified",
-        message: `Welcome, ${user.name.split(" ")[0]} (@${userDomain})`,
-      });
+      toast.success(`Welcome, ${user.name.split(" ")[0]} (@${userDomain})`);
       // Wait for the animated tick to finish playing
       await new Promise((resolve) => setTimeout(resolve, 1400));
     });
@@ -68,14 +77,6 @@ export default function LoginScreen() {
           contentContainerStyle={[styles.scroll, isWide && styles.scrollWide]}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Eyebrow / Overline */}
-          <View style={styles.eyebrowContainer}>
-            <View style={styles.eyebrowPill}>
-              <View style={styles.eyebrowDot} />
-              <Text style={styles.eyebrowText}>ENTERPRISE WORKSPACE</Text>
-            </View>
-          </View>
-
           {/* Authentication Card (ex-auth-form-card) */}
           <View style={[styles.card, isWide && styles.cardWide]}>
             {verifiedUser ? (
@@ -87,9 +88,7 @@ export default function LoginScreen() {
               <>
                 {/* Minimalist Emblem */}
                 <View style={styles.emblemContainer}>
-                  <View style={styles.emblem}>
-                    <Text style={styles.emblemLetter}>H</Text>
-                  </View>
+                  <HorizonIcon size={48} variant="filled" />
                   <Text style={styles.wordmark}>HORIZON</Text>
                 </View>
 
@@ -117,6 +116,14 @@ export default function LoginScreen() {
                   isLoading={isLoading}
                   style={styles.actionButton}
                 />
+
+                {/* Domain Security Policy Note */}
+                <View style={styles.policyNotice}>
+                  <View style={styles.policyIconDot} />
+                  <Text style={styles.policyText}>
+                    Access is exclusively to {allowedDomainsList}
+                  </Text>
+                </View>
               </>
             )}
           </View>
@@ -194,21 +201,6 @@ const styles = StyleSheet.create({
   emblemContainer: {
     alignItems: "center",
     gap: spacing.xs,
-  },
-  emblem: {
-    width: 48,
-    height: 48,
-    borderRadius: rounded.full,
-    backgroundColor: colors.stone,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  emblemLetter: {
-    fontFamily: fonts.serif,
-    fontSize: 24,
-    fontWeight: "300",
-    color: colors.onStone,
-    marginTop: -2,
   },
   wordmark: {
     fontFamily: fonts.serif,

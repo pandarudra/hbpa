@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   View,
   Text,
@@ -7,57 +7,52 @@ import {
   TouchableOpacity,
   SafeAreaView,
   useWindowDimensions,
-} from 'react-native';
-import { useAuth } from '@/providers/AuthProvider';
-import { useToast } from '@/providers/ToastProvider';
-import { Avatar } from '@/components/common/Avatar';
-import { RoleBadge } from '@/features/dashboard/components/RoleBadge';
-import { colors, fonts, rounded, spacing, shadows } from '@/constants/theme';
+} from "react-native";
+import { useAuth } from "@/providers/AuthProvider";
+import toast from "react-hot-toast";
+import { Avatar } from "@/components/common/Avatar";
+import { HorizonIcon } from "@/components/common/HorizonIcon";
+import { RoleBadge } from "@/features/dashboard/components/RoleBadge";
+import { colors, fonts, rounded, spacing, shadows } from "@/constants/theme";
 
 export default function DashboardScreen() {
   const { user, signOut } = useAuth();
-  const { showToast } = useToast();
   const { width } = useWindowDimensions();
   const isWide = width > 640;
 
   if (!user) return null;
 
   const handleSignOut = async () => {
-    showToast({
-      type: 'info',
-      message: 'Signed out of Horizon workspace.',
-    });
+    toast("Signed out of Horizon workspace.");
     await signOut();
   };
 
-  const firstName = user.name ? user.name.split(' ')[0] : 'Member';
+  const firstName = user.name ? user.name.split(" ")[0] : "Member";
 
   const memberSince = user.createdAt
-    ? new Date(user.createdAt).toLocaleDateString('en-US', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
+    ? new Date(user.createdAt).toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
       })
-    : '—';
+    : "—";
 
   const lastLogin = user.lastLoginAt
-    ? new Date(user.lastLoginAt).toLocaleDateString('en-US', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
+    ? new Date(user.lastLoginAt).toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
       })
-    : '—';
+    : "—";
 
-  const emailDomain = user.email ? user.email.split('@')[1] ?? '' : '';
+  const emailDomain = user.email ? (user.email.split("@")[1] ?? "") : "";
 
   return (
     <SafeAreaView style={styles.safe}>
       {/* Navigation Bar (nav-bar) */}
       <View style={styles.navBar}>
         <View style={styles.navLeft}>
-          <View style={styles.navEmblem}>
-            <Text style={styles.navEmblemText}>H</Text>
-          </View>
+          <HorizonIcon size={26} variant="filled" />
           <Text style={styles.navTitle}>HORIZON</Text>
         </View>
 
@@ -96,7 +91,9 @@ export default function DashboardScreen() {
           <View style={styles.profileHeader}>
             <Avatar uri={user.avatarUrl} name={user.name} size={68} />
             <View style={styles.profileMeta}>
-              <Text style={styles.userName}>{user.name || 'Organization Member'}</Text>
+              <Text style={styles.userName}>
+                {user.name || "Organization Member"}
+              </Text>
               <Text style={styles.userEmail}>{user.email}</Text>
               <View style={styles.badgeRow}>
                 <RoleBadge role={user.role} />
@@ -116,8 +113,8 @@ export default function DashboardScreen() {
           />
           <StatRow
             label="Account Status"
-            value={user.status === 'ACTIVE' ? 'Active' : user.status}
-            statusDot={user.status === 'ACTIVE'}
+            value={user.status === "ACTIVE" ? "Active" : user.status}
+            statusDot={user.status === "ACTIVE"}
           />
           <StatRow label="Identity Provider" value="Google Workspace" />
           <StatRow label="Member Since" value={memberSince} />
@@ -134,7 +131,6 @@ export default function DashboardScreen() {
         >
           <Text style={styles.signOutButtonText}>Sign Out of Horizon</Text>
         </TouchableOpacity>
-
         {/* Quiet Editorial Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
@@ -183,9 +179,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.canvas,
   },
   navBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     backgroundColor: colors.canvas,
@@ -193,36 +189,21 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.hairline,
   },
   navLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing.xs,
-  },
-  navEmblem: {
-    width: 26,
-    height: 26,
-    borderRadius: rounded.full,
-    backgroundColor: colors.stone,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  navEmblemText: {
-    color: colors.onStone,
-    fontFamily: fonts.serif,
-    fontSize: 13,
-    fontWeight: '300',
-    marginTop: -1,
   },
   navTitle: {
     fontFamily: fonts.serif,
     fontSize: 15,
-    fontWeight: '300',
+    fontWeight: "300",
     letterSpacing: 2,
     color: colors.stone,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   navRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing.md,
   },
   navLogoutBtn: {
@@ -237,7 +218,7 @@ const styles = StyleSheet.create({
     color: colors.stone,
     fontFamily: fonts.sans,
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
     letterSpacing: 0.3,
   },
   scroll: {
@@ -247,8 +228,8 @@ const styles = StyleSheet.create({
   },
   scrollWide: {
     maxWidth: 580,
-    width: '100%',
-    alignSelf: 'center',
+    width: "100%",
+    alignSelf: "center",
     paddingVertical: spacing.xxl,
   },
   heroSection: {
@@ -256,10 +237,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   heroEyebrow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing.xs,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   heroDot: {
     width: 6,
@@ -270,15 +251,15 @@ const styles = StyleSheet.create({
   heroEyebrowText: {
     fontFamily: fonts.sans,
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: "700",
     letterSpacing: 1.2,
     color: colors.stone,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   heroHeading: {
     fontFamily: fonts.serif,
     fontSize: 32,
-    fontWeight: '300',
+    fontWeight: "300",
     color: colors.ink,
     letterSpacing: -0.3,
     lineHeight: 38,
@@ -299,8 +280,8 @@ const styles = StyleSheet.create({
     ...shadows.card,
   },
   profileHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing.lg,
   },
   profileMeta: {
@@ -310,7 +291,7 @@ const styles = StyleSheet.create({
   userName: {
     fontFamily: fonts.sans,
     fontSize: 19,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.ink,
     letterSpacing: 0.1,
   },
@@ -325,16 +306,16 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontFamily: fonts.sans,
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: "700",
     letterSpacing: 0.8,
     color: colors.ash,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     marginBottom: spacing.xxs,
   },
   statRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.hairline,
@@ -349,8 +330,8 @@ const styles = StyleSheet.create({
     color: colors.stone,
   },
   statValueGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing.xs,
   },
   statusDot: {
@@ -362,12 +343,12 @@ const styles = StyleSheet.create({
   statValue: {
     fontFamily: fonts.sans,
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
     color: colors.ink,
   },
   statValueAccent: {
     color: colors.primary,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   signOutButton: {
     backgroundColor: colors.canvas,
@@ -375,20 +356,20 @@ const styles = StyleSheet.create({
     borderColor: colors.stone,
     borderRadius: rounded.full,
     paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
     minHeight: 48,
   },
   signOutButtonText: {
     fontFamily: fonts.sans,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.stone,
     letterSpacing: 0.3,
   },
   footer: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: spacing.md,
   },
   footerText: {

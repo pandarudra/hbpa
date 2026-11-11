@@ -41,4 +41,8 @@ export const authApi = {
   /** Return the currently authenticated user, or throw 401 if no session. */
   me: () =>
     request<{ success: true; user: AppUser }>('/api/auth/me'),
+
+  /** Return the allowed email domains configured on the server. */
+  getDomains: () =>
+    request<{ success: true; domains: string[] }>('/api/auth/domains'),
 };
