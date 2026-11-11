@@ -9,11 +9,13 @@ import {
   Platform,
   SafeAreaView,
   Pressable,
+  Linking,
 } from "react-native";
 import config from "@/constants/config";
 import { useAuth } from "@/providers/AuthProvider";
 import toast from "react-hot-toast";
 import { Info } from "lucide-react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { GoogleSignInButton } from "@/features/authentication/components/GoogleSignInButton";
 import { AuthErrorMessage } from "@/features/authentication/components/AuthErrorMessage";
 import { LoginSuccessAnimation } from "@/features/authentication/components/LoginSuccessAnimation";
@@ -23,6 +25,8 @@ import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { authApi } from "@/features/authentication/services/authApi";
 import type { AppUser } from "@/features/authentication/types/auth.types";
 import { useTheme, typography } from "@/theme";
+
+const REPO_URL = "https://github.com/pandarudra/hbpa";
 
 export default function LoginScreen() {
   const { signIn, isLoading, error, clearError } = useAuth();
@@ -169,30 +173,63 @@ export default function LoginScreen() {
                   </Text>
                 </View>
 
-                {/* Info Link: setup, auth flow & domain restriction explainer */}
-                <Pressable
-                  onPress={() => setInfoVisible(true)}
-                  style={({ pressed }) => [
-                    styles.infoLink,
-                    { opacity: pressed ? 0.6 : 1 },
-                  ]}
-                  accessibilityRole="button"
-                  accessibilityLabel="How sign-in and domain restriction work"
-                >
-                  <Info
-                    size={13}
-                    color={colors.textSecondary}
-                    strokeWidth={2}
-                  />
-                  <Text
-                    style={[
-                      styles.infoLinkText,
-                      { color: colors.textSecondary },
+                {/* Footer Links: sign-in explainer & GitHub repo */}
+                <View style={styles.footerLinksRow}>
+                  <Pressable
+                    onPress={() => setInfoVisible(true)}
+                    style={({ pressed }) => [
+                      styles.infoLink,
+                      { opacity: pressed ? 0.6 : 1 },
                     ]}
+                    accessibilityRole="button"
+                    accessibilityLabel="How sign-in and domain restriction work"
                   >
-                    How does sign-in work?
-                  </Text>
-                </Pressable>
+                    <Info
+                      size={13}
+                      color={colors.textSecondary}
+                      strokeWidth={2}
+                    />
+                    <Text
+                      style={[
+                        styles.infoLinkText,
+                        { color: colors.textSecondary },
+                      ]}
+                    >
+                      How does sign-in work?
+                    </Text>
+                  </Pressable>
+
+                  <View
+                    style={[
+                      styles.footerDivider,
+                      { backgroundColor: colors.border },
+                    ]}
+                  />
+
+                  <Pressable
+                    onPress={() => Linking.openURL(REPO_URL)}
+                    style={({ pressed }) => [
+                      styles.infoLink,
+                      { opacity: pressed ? 0.6 : 1 },
+                    ]}
+                    accessibilityRole="link"
+                    accessibilityLabel="View source on GitHub"
+                  >
+                    <Ionicons
+                      name="logo-github"
+                      size={14}
+                      color={colors.textSecondary}
+                    />
+                    <Text
+                      style={[
+                        styles.infoLinkText,
+                        { color: colors.textSecondary },
+                      ]}
+                    >
+                      GitHub
+                    </Text>
+                  </Pressable>
+                </View>
               </>
             )}
           </View>
@@ -318,11 +355,20 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     textAlign: "center",
   },
+  footerLinksRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginTop: 2,
+  },
+  footerDivider: {
+    width: 1,
+    height: 12,
+  },
   infoLink: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    marginTop: 2,
   },
   infoLinkText: {
     fontFamily: typography.fonts.body,
