@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import type { UserRole } from '@/features/authentication/types/auth.types';
-import { useTheme } from '@/theme';
+import { useTheme, typography } from '@/theme';
 
 export function RoleBadge({ role }: { role: UserRole }) {
   const { colors } = useTheme();
@@ -42,6 +42,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   label: {
+    fontFamily: typography.fonts.bodyBold,
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 0.8,

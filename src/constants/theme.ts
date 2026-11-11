@@ -43,18 +43,17 @@ export const colors = {
 } as const;
 
 export const fonts = {
+  heading: 'TheGirlNextDoor',
   serif: Platform.select({
     web: "-apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Inter', 'Segoe UI', Roboto, sans-serif",
     ios: 'System',
     android: 'sans-serif-medium',
     default: 'sans-serif',
   }),
-  sans: Platform.select({
-    web: "-apple-system, BlinkMacSystemFont, 'Inter', 'Plus Jakarta Sans', 'Segoe UI', Roboto, sans-serif",
-    ios: 'System',
-    android: 'sans-serif',
-    default: 'sans-serif',
-  }),
+  sans: 'UbuntuSans-Regular',
+  sansMedium: 'UbuntuSans-Medium',
+  sansSemibold: 'UbuntuSans-SemiBold',
+  sansBold: 'UbuntuSans-Bold',
 };
 
 export const rounded = {

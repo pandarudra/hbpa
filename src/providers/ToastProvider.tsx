@@ -27,7 +27,7 @@ const webToastOptions = {
     borderRadius: `${rounded.lg}px`,
     padding: `${spacing.sm}px ${spacing.md}px`,
     fontFamily:
-      "-apple-system, BlinkMacSystemFont, 'Inter', 'AkkuratLL', 'Segoe UI', Roboto, sans-serif",
+      "'UbuntuSans-Regular', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
     fontSize: '14px',
     fontWeight: '400',
     lineHeight: '1.4',

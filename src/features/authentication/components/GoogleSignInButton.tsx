@@ -8,7 +8,7 @@ import {
   Image,
   type ViewStyle,
 } from 'react-native';
-import { useTheme } from '@/theme';
+import { useTheme, typography } from '@/theme';
 
 interface Props {
   onPress: () => void;
@@ -82,6 +82,7 @@ const styles = StyleSheet.create({
     height: 15,
   },
   label: {
+    fontFamily: typography.fonts.bodySemibold,
     fontSize: 15,
     fontWeight: '600',
     letterSpacing: -0.1,

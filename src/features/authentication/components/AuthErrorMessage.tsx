@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import type { AuthErrorCode } from '../types/auth.types';
 import { CloseIcon, AlertCircleIcon } from '@/components/common/Icons';
-import { useTheme } from '@/theme';
+import { useTheme, typography } from '@/theme';
 
 const ERROR_MESSAGES: Record<AuthErrorCode, string> = {
   DOMAIN_NOT_ALLOWED:
@@ -75,6 +75,7 @@ const styles = StyleSheet.create({
   },
   text: {
     flex: 1,
+    fontFamily: typography.fonts.bodyMedium,
     fontSize: 13,
     lineHeight: 18,
     fontWeight: '500',

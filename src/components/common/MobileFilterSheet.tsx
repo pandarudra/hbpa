@@ -7,7 +7,7 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
 } from 'react-native';
-import { useTheme } from '@/theme';
+import { useTheme, typography } from '@/theme';
 import { CloseIcon } from './Icons';
 
 interface MobileFilterSheetProps {
@@ -132,6 +132,9 @@ export const MobileFilterSheet: React.FC<MobileFilterSheetProps> = ({
                             styles.optionPillText,
                             {
                               color: isSelected ? colors.primaryForeground : colors.textPrimary,
+                              fontFamily: isSelected
+                                ? typography.fonts.bodySemibold
+                                : typography.fonts.body,
                               fontWeight: isSelected ? '600' : '400',
                             },
                           ]}
@@ -168,6 +171,9 @@ export const MobileFilterSheet: React.FC<MobileFilterSheetProps> = ({
                             styles.optionPillText,
                             {
                               color: isSelected ? colors.primaryForeground : colors.textPrimary,
+                              fontFamily: isSelected
+                                ? typography.fonts.bodySemibold
+                                : typography.fonts.body,
                               fontWeight: isSelected ? '600' : '400',
                             },
                           ]}
@@ -257,11 +263,13 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   sheetTitle: {
+    fontFamily: typography.fonts.bodyBold,
     fontSize: 18,
     fontWeight: '700',
     letterSpacing: -0.3,
   },
   sheetSubtitle: {
+    fontFamily: typography.fonts.body,
     fontSize: 12,
     marginTop: 2,
   },
@@ -272,6 +280,7 @@ const styles = StyleSheet.create({
     marginTop: 18,
   },
   sectionLabel: {
+    fontFamily: typography.fonts.bodyBold,
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 0.8,
@@ -307,6 +316,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   resetBtnText: {
+    fontFamily: typography.fonts.bodySemibold,
     fontSize: 14,
     fontWeight: '600',
   },
@@ -318,6 +328,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   applyBtnText: {
+    fontFamily: typography.fonts.bodySemibold,
     fontSize: 14,
     fontWeight: '600',
   },

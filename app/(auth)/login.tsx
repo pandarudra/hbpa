@@ -19,7 +19,7 @@ import { HorizonIcon } from '@/components/common/HorizonIcon';
 import { ThemeToggle } from '@/components/common/ThemeToggle';
 import { authApi } from '@/features/authentication/services/authApi';
 import type { AppUser } from '@/features/authentication/types/auth.types';
-import { useTheme } from '@/theme';
+import { useTheme, typography } from '@/theme';
 
 export default function LoginScreen() {
   const { signIn, isLoading, error, clearError } = useAuth();
@@ -236,12 +236,14 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   heading: {
-    fontSize: 26,
-    fontWeight: '700',
+    fontFamily: typography.fonts.heading,
+    fontSize: 32,
+    fontWeight: '400',
     textAlign: 'center',
     letterSpacing: -0.5,
   },
   subheading: {
+    fontFamily: typography.fonts.body,
     fontSize: 14,
     lineHeight: 20,
     textAlign: 'center',
@@ -268,6 +270,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   policyText: {
+    fontFamily: typography.fonts.bodySemibold,
     fontSize: 12,
     fontWeight: '600',
     textAlign: 'center',

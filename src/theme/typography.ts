@@ -2,18 +2,11 @@ import { Platform } from 'react-native';
 
 export const typography = {
   fonts: {
-    heading: Platform.select({
-      web: "-apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Inter', 'Segoe UI', Roboto, sans-serif",
-      ios: 'System',
-      android: 'sans-serif-medium',
-      default: 'sans-serif',
-    }),
-    body: Platform.select({
-      web: "-apple-system, BlinkMacSystemFont, 'Inter', 'Plus Jakarta Sans', 'Segoe UI', Roboto, sans-serif",
-      ios: 'System',
-      android: 'sans-serif',
-      default: 'sans-serif',
-    }),
+    heading: 'TheGirlNextDoor',
+    body: 'UbuntuSans-Regular',
+    bodyMedium: 'UbuntuSans-Medium',
+    bodySemibold: 'UbuntuSans-SemiBold',
+    bodyBold: 'UbuntuSans-Bold',
     mono: Platform.select({
       web: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace",
       ios: 'Menlo',

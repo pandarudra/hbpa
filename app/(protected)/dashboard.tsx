@@ -15,7 +15,7 @@ import { Avatar } from '@/components/common/Avatar';
 import { HorizonIcon } from '@/components/common/HorizonIcon';
 import { ThemeToggle } from '@/components/common/ThemeToggle';
 import { ProfileMenuModal } from '@/components/common/ProfileMenuModal';
-import { useTheme } from '@/theme';
+import { useTheme, typography } from '@/theme';
 
 export default function DashboardScreen() {
   const { user, signOut } = useAuth();
@@ -200,6 +200,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   signOutText: {
+    fontFamily: typography.fonts.bodySemibold,
     fontSize: 12,
     fontWeight: '600',
     letterSpacing: 0.2,
@@ -238,24 +239,27 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   eyebrowText: {
+    fontFamily: typography.fonts.bodyBold,
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 1.2,
     textTransform: 'uppercase',
   },
   welcomeHeading: {
-    fontSize: Platform.select({ web: 36, default: 30 }),
-    fontWeight: '700',
+    fontFamily: typography.fonts.heading,
+    fontSize: Platform.select({ web: 44, default: 38 }),
+    fontWeight: '400',
     textAlign: 'center',
     letterSpacing: -0.6,
-    lineHeight: Platform.select({ web: 44, default: 38 }),
+    lineHeight: Platform.select({ web: 52, default: 46 }),
   },
   welcomeHeadingCompact: {
-    fontSize: 26,
-    lineHeight: 34,
+    fontSize: 32,
+    lineHeight: 42,
     letterSpacing: -0.4,
   },
   confirmationText: {
+    fontFamily: typography.fonts.body,
     fontSize: 15,
     lineHeight: 22,
     textAlign: 'center',

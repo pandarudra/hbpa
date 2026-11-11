@@ -1,6 +1,6 @@
 import React from 'react';
 import { Image, View, Text, StyleSheet } from 'react-native';
-import { useTheme } from '@/theme';
+import { useTheme, typography } from '@/theme';
 
 interface Props {
   uri?: string;
@@ -74,6 +74,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   initials: {
+    fontFamily: typography.fonts.bodyBold,
     fontWeight: '700',
     letterSpacing: 0.5,
   },

@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   tickGlyph: {
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
     fontSize: 34,
     fontWeight: '700',
     color: colors.forest,
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.forest,
   },
   eyebrowText: {
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 1.2,
@@ -227,9 +227,9 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   heading: {
-    fontFamily: fonts.serif,
-    fontSize: 26,
-    fontWeight: '300',
+    fontFamily: fonts.heading,
+    fontSize: 30,
+    fontWeight: '400',
     color: colors.ink,
     textAlign: 'center',
     letterSpacing: -0.2,
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.forest,
   },
   domainText: {
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansSemibold,
     fontSize: 12,
     fontWeight: '600',
     color: colors.primary,

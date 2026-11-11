@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -9,12 +9,12 @@ import {
   SafeAreaView,
   ActivityIndicator,
   useWindowDimensions,
-} from 'react-native';
-import { Redirect } from 'expo-router';
-import { useAuth } from '@/providers/AuthProvider';
-import toast from 'react-hot-toast';
-import { Avatar } from '@/components/common/Avatar';
-import { HorizonIcon } from '@/components/common/HorizonIcon';
+} from "react-native";
+import { Redirect } from "expo-router";
+import { useAuth } from "@/providers/AuthProvider";
+import toast from "react-hot-toast";
+import { Avatar } from "@/components/common/Avatar";
+import { HorizonIcon } from "@/components/common/HorizonIcon";
 import {
   SearchIcon,
   CloseIcon,
@@ -22,19 +22,21 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   FilterIcon,
-} from '@/components/common/Icons';
-import { ThemeToggle } from '@/components/common/ThemeToggle';
-import { ProfileMenuModal } from '@/components/common/ProfileMenuModal';
-import { MobileFilterSheet } from '@/components/common/MobileFilterSheet';
-import { RoleBadge } from '@/features/dashboard/components/RoleBadge';
-import { adminApi } from '@/services/api/adminApi';
+} from "@/components/common/Icons";
+import { ThemeToggle } from "@/components/common/ThemeToggle";
+import { ProfileMenuModal } from "@/components/common/ProfileMenuModal";
+import { MobileFilterSheet } from "@/components/common/MobileFilterSheet";
+import { RoleBadge } from "@/features/dashboard/components/RoleBadge";
+import { adminApi } from "@/services/api/adminApi";
 import type {
   AdminUserItem,
   AdminPagination,
   UserRole,
   UserStatus,
-} from '@/features/authentication/types/auth.types';
-import { useTheme } from '@/theme';
+} from "@/features/authentication/types/auth.types";
+import { useTheme, typography } from "@/theme";
+import { HandDrawnUnderline } from "@/components/common/HandDrawnUnderline";
+import { HandDrawnHighlight } from "@/components/common/HandDrawnHighlight";
 
 export default function AdminDashboardScreen() {
   const { user, signOut } = useAuth();
@@ -43,10 +45,14 @@ export default function AdminDashboardScreen() {
   const isCompact = width < 768;
 
   // Filter & Pagination State
-  const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [selectedRole, setSelectedRole] = useState<UserRole | undefined>(undefined);
-  const [selectedStatus, setSelectedStatus] = useState<UserStatus | undefined>(undefined);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [selectedRole, setSelectedRole] = useState<UserRole | undefined>(
+    undefined,
+  );
+  const [selectedStatus, setSelectedStatus] = useState<UserStatus | undefined>(
+    undefined,
+  );
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
@@ -70,7 +76,7 @@ export default function AdminDashboardScreen() {
   }, [searchTerm]);
 
   const fetchUsers = useCallback(async () => {
-    if (!user || user.role !== 'ADMIN') return;
+    if (!user || user.role !== "ADMIN") return;
     setIsLoading(true);
     setErrorMsg(null);
     try {
@@ -86,19 +92,26 @@ export default function AdminDashboardScreen() {
       setPagination(res.data.pagination);
     } catch (err: unknown) {
       const e = err as { message?: string };
-      setErrorMsg(e.message ?? 'Failed to load organization users.');
-      toast.error('Failed to load user directory.');
+      setErrorMsg(e.message ?? "Failed to load organization users.");
+      toast.error("Failed to load user directory.");
     } finally {
       setIsLoading(false);
     }
-  }, [user, currentPage, pageSize, debouncedSearch, selectedRole, selectedStatus]);
+  }, [
+    user,
+    currentPage,
+    pageSize,
+    debouncedSearch,
+    selectedRole,
+    selectedStatus,
+  ]);
 
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
 
   const handleSignOut = async () => {
-    toast('Signed out of Horizon workspace.');
+    toast("Signed out of Horizon workspace.");
     await signOut();
   };
 
@@ -121,7 +134,7 @@ export default function AdminDashboardScreen() {
 
   const paginationInfo = useMemo(() => {
     if (!pagination || pagination.totalUsers === 0) {
-      return 'Showing 0 users';
+      return "Showing 0 users";
     }
     const start = (pagination.currentPage - 1) * pagination.pageSize + 1;
     const end = Math.min(
@@ -133,7 +146,7 @@ export default function AdminDashboardScreen() {
 
   // Authorization Guard: Regular USER must be redirected to /dashboard
   if (!user) return null;
-  if (user.role !== 'ADMIN') {
+  if (user.role !== "ADMIN") {
     return <Redirect href="/dashboard" />;
   }
 
@@ -153,18 +166,22 @@ export default function AdminDashboardScreen() {
         {/* Left: Horizon Brand + Admin Pill */}
         <View style={styles.headerLeft}>
           <HorizonIcon size={isCompact ? 24 : 26} variant="filled" />
-          <Text style={[styles.brandName, { color: colors.textPrimary }]}>HORIZON</Text>
-          <View
-            style={[
-              styles.adminIndicator,
-              {
-                backgroundColor: colors.roleAdminBg,
-                borderColor: colors.roleAdminBorder,
-              },
-            ]}
+          <Text style={[styles.brandName, { color: colors.textPrimary }]}>
+            HORIZON
+          </Text>
+          <HandDrawnHighlight
+            color={colors.roleAdminText}
+            style={styles.adminIndicator}
           >
-            <Text style={[styles.adminIndicatorText, { color: colors.roleAdminText }]}>ADMIN</Text>
-          </View>
+            <Text
+              style={[
+                styles.adminIndicatorText,
+                { color: colors.roleAdminText },
+              ]}
+            >
+              ADMIN
+            </Text>
+          </HandDrawnHighlight>
         </View>
 
         {/* Right: Theme Toggle + User Avatar (opens ProfileMenu) + Sign Out on desktop */}
@@ -178,7 +195,11 @@ export default function AdminDashboardScreen() {
             activeOpacity={0.8}
             style={styles.avatarButton}
           >
-            <Avatar uri={user.avatarUrl} name={user.name} size={isCompact ? 32 : 34} />
+            <Avatar
+              uri={user.avatarUrl}
+              name={user.name}
+              size={isCompact ? 32 : 34}
+            />
           </TouchableOpacity>
 
           {!isCompact && (
@@ -195,7 +216,9 @@ export default function AdminDashboardScreen() {
               accessibilityRole="button"
               activeOpacity={0.8}
             >
-              <Text style={[styles.signOutText, { color: colors.textPrimary }]}>Sign Out</Text>
+              <Text style={[styles.signOutText, { color: colors.textPrimary }]}>
+                Sign Out
+              </Text>
             </TouchableOpacity>
           )}
         </View>
@@ -221,7 +244,10 @@ export default function AdminDashboardScreen() {
             >
               User Management
             </Text>
-            <Text style={[styles.pageDescription, { color: colors.textSecondary }]}>
+
+            <Text
+              style={[styles.pageDescription, { color: colors.textSecondary }]}
+            >
               Manage and review registered members of your organization.
             </Text>
           </View>
@@ -246,7 +272,11 @@ export default function AdminDashboardScreen() {
                 },
               ]}
             >
-              <SearchIcon size={15} color={colors.textSecondary} style={styles.searchIcon} />
+              <SearchIcon
+                size={15}
+                color={colors.textSecondary}
+                style={styles.searchIcon}
+              />
               <TextInput
                 style={[styles.searchInput, { color: colors.textPrimary }]}
                 placeholder="Search by name or email…"
@@ -259,7 +289,7 @@ export default function AdminDashboardScreen() {
               />
               {searchTerm.length > 0 && (
                 <TouchableOpacity
-                  onPress={() => setSearchTerm('')}
+                  onPress={() => setSearchTerm("")}
                   hitSlop={8}
                   style={styles.clearSearchBtn}
                 >
@@ -276,8 +306,12 @@ export default function AdminDashboardScreen() {
                   style={[
                     styles.mobileFilterTriggerBtn,
                     {
-                      backgroundColor: activeFilterCount > 0 ? colors.primary : colors.surfaceSecondary,
-                      borderColor: activeFilterCount > 0 ? colors.primary : colors.border,
+                      backgroundColor:
+                        activeFilterCount > 0
+                          ? colors.primary
+                          : colors.surfaceSecondary,
+                      borderColor:
+                        activeFilterCount > 0 ? colors.primary : colors.border,
                     },
                   ]}
                   accessibilityRole="button"
@@ -286,23 +320,38 @@ export default function AdminDashboardScreen() {
                 >
                   <FilterIcon
                     size={14}
-                    color={activeFilterCount > 0 ? colors.primaryForeground : colors.textPrimary}
+                    color={
+                      activeFilterCount > 0
+                        ? colors.primaryForeground
+                        : colors.textPrimary
+                    }
                   />
                   <Text
                     style={[
                       styles.mobileFilterTriggerText,
                       {
-                        color: activeFilterCount > 0 ? colors.primaryForeground : colors.textPrimary,
+                        color:
+                          activeFilterCount > 0
+                            ? colors.primaryForeground
+                            : colors.textPrimary,
                       },
                     ]}
                   >
-                    Filter {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
+                    Filter{" "}
+                    {activeFilterCount > 0 ? `(${activeFilterCount})` : ""}
                   </Text>
                 </TouchableOpacity>
 
                 {/* Per Page Quick Select on Mobile */}
                 <View style={styles.mobilePerPageGroup}>
-                  <Text style={[styles.perPageLabel, { color: colors.textSecondary }]}>Rows:</Text>
+                  <Text
+                    style={[
+                      styles.perPageLabel,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
+                    Rows:
+                  </Text>
                   {[10, 25, 50].map((limitVal) => {
                     const isSelected = pageSize === limitVal;
                     return (
@@ -312,8 +361,12 @@ export default function AdminDashboardScreen() {
                         style={[
                           styles.mobilePerPagePill,
                           {
-                            backgroundColor: isSelected ? colors.primary : colors.surfaceSecondary,
-                            borderColor: isSelected ? colors.primary : colors.border,
+                            backgroundColor: isSelected
+                              ? colors.primary
+                              : colors.surfaceSecondary,
+                            borderColor: isSelected
+                              ? colors.primary
+                              : colors.border,
                           },
                         ]}
                       >
@@ -321,8 +374,13 @@ export default function AdminDashboardScreen() {
                           style={[
                             styles.mobilePerPagePillText,
                             {
-                              color: isSelected ? colors.primaryForeground : colors.textSecondary,
-                              fontWeight: isSelected ? '600' : '400',
+                              color: isSelected
+                                ? colors.primaryForeground
+                                : colors.textSecondary,
+                              fontFamily: isSelected
+                                ? typography.fonts.bodySemibold
+                                : typography.fonts.body,
+                              fontWeight: isSelected ? "600" : "400",
                             },
                           ]}
                         >
@@ -344,18 +402,37 @@ export default function AdminDashboardScreen() {
                 <View style={styles.filtersRow}>
                   {/* Role Filters */}
                   <View style={styles.filterGroup}>
-                    <Text style={[styles.filterLabel, { color: colors.textSecondary }]}>ROLE:</Text>
-                    {(['ALL', 'USER', 'ADMIN'] as const).map((r) => {
-                      const isSelected = (r === 'ALL' && selectedRole === undefined) || selectedRole === r;
+                    <HandDrawnUnderline>
+                      <Text
+                        style={[
+                          styles.filterLabel,
+                          { color: colors.textSecondary },
+                        ]}
+                      >
+                        ROLE:
+                      </Text>
+                    </HandDrawnUnderline>
+                    {(["ALL", "USER", "ADMIN"] as const).map((r) => {
+                      const isSelected =
+                        (r === "ALL" && selectedRole === undefined) ||
+                        selectedRole === r;
                       return (
                         <TouchableOpacity
                           key={r}
-                          onPress={() => handleRoleChange(r === 'ALL' ? undefined : (r as UserRole))}
+                          onPress={() =>
+                            handleRoleChange(
+                              r === "ALL" ? undefined : (r as UserRole),
+                            )
+                          }
                           style={[
                             styles.filterPill,
                             {
-                              backgroundColor: isSelected ? colors.primary : colors.surfaceSecondary,
-                              borderColor: isSelected ? colors.primary : colors.border,
+                              backgroundColor: isSelected
+                                ? colors.primary
+                                : colors.surfaceSecondary,
+                              borderColor: isSelected
+                                ? colors.primary
+                                : colors.border,
                             },
                           ]}
                         >
@@ -363,12 +440,21 @@ export default function AdminDashboardScreen() {
                             style={[
                               styles.filterPillText,
                               {
-                                color: isSelected ? colors.primaryForeground : colors.textPrimary,
-                                fontWeight: isSelected ? '600' : '500',
+                                color: isSelected
+                                  ? colors.primaryForeground
+                                  : colors.textPrimary,
+                                fontFamily: isSelected
+                                  ? typography.fonts.bodySemibold
+                                  : typography.fonts.bodyMedium,
+                                fontWeight: isSelected ? "600" : "500",
                               },
                             ]}
                           >
-                            {r === 'ALL' ? 'All' : r === 'USER' ? 'User' : 'Admin'}
+                            {r === "ALL"
+                              ? "All"
+                              : r === "USER"
+                                ? "User"
+                                : "Admin"}
                           </Text>
                         </TouchableOpacity>
                       );
@@ -377,18 +463,37 @@ export default function AdminDashboardScreen() {
 
                   {/* Status Filters */}
                   <View style={styles.filterGroup}>
-                    <Text style={[styles.filterLabel, { color: colors.textSecondary }]}>STATUS:</Text>
-                    {(['ALL', 'ACTIVE', 'DISABLED'] as const).map((s) => {
-                      const isSelected = (s === 'ALL' && selectedStatus === undefined) || selectedStatus === s;
+                    <HandDrawnUnderline>
+                      <Text
+                        style={[
+                          styles.filterLabel,
+                          { color: colors.textSecondary },
+                        ]}
+                      >
+                        STATUS:
+                      </Text>
+                    </HandDrawnUnderline>
+                    {(["ALL", "ACTIVE", "DISABLED"] as const).map((s) => {
+                      const isSelected =
+                        (s === "ALL" && selectedStatus === undefined) ||
+                        selectedStatus === s;
                       return (
                         <TouchableOpacity
                           key={s}
-                          onPress={() => handleStatusChange(s === 'ALL' ? undefined : (s as UserStatus))}
+                          onPress={() =>
+                            handleStatusChange(
+                              s === "ALL" ? undefined : (s as UserStatus),
+                            )
+                          }
                           style={[
                             styles.filterPill,
                             {
-                              backgroundColor: isSelected ? colors.primary : colors.surfaceSecondary,
-                              borderColor: isSelected ? colors.primary : colors.border,
+                              backgroundColor: isSelected
+                                ? colors.primary
+                                : colors.surfaceSecondary,
+                              borderColor: isSelected
+                                ? colors.primary
+                                : colors.border,
                             },
                           ]}
                         >
@@ -396,12 +501,21 @@ export default function AdminDashboardScreen() {
                             style={[
                               styles.filterPillText,
                               {
-                                color: isSelected ? colors.primaryForeground : colors.textPrimary,
-                                fontWeight: isSelected ? '600' : '500',
+                                color: isSelected
+                                  ? colors.primaryForeground
+                                  : colors.textPrimary,
+                                fontFamily: isSelected
+                                  ? typography.fonts.bodySemibold
+                                  : typography.fonts.bodyMedium,
+                                fontWeight: isSelected ? "600" : "500",
                               },
                             ]}
                           >
-                            {s === 'ALL' ? 'All' : s === 'ACTIVE' ? 'Active' : 'Disabled'}
+                            {s === "ALL"
+                              ? "All"
+                              : s === "ACTIVE"
+                                ? "Active"
+                                : "Disabled"}
                           </Text>
                         </TouchableOpacity>
                       );
@@ -410,7 +524,16 @@ export default function AdminDashboardScreen() {
 
                   {/* Page Size Selector */}
                   <View style={styles.filterGroup}>
-                    <Text style={[styles.filterLabel, { color: colors.textSecondary }]}>PER PAGE:</Text>
+                    <HandDrawnUnderline>
+                      <Text
+                        style={[
+                          styles.filterLabel,
+                          { color: colors.textSecondary },
+                        ]}
+                      >
+                        PER PAGE:
+                      </Text>
+                    </HandDrawnUnderline>
                     {[10, 25, 50].map((limitVal) => {
                       const isSelected = pageSize === limitVal;
                       return (
@@ -420,8 +543,12 @@ export default function AdminDashboardScreen() {
                           style={[
                             styles.filterPill,
                             {
-                              backgroundColor: isSelected ? colors.primary : colors.surfaceSecondary,
-                              borderColor: isSelected ? colors.primary : colors.border,
+                              backgroundColor: isSelected
+                                ? colors.primary
+                                : colors.surfaceSecondary,
+                              borderColor: isSelected
+                                ? colors.primary
+                                : colors.border,
                             },
                           ]}
                         >
@@ -429,8 +556,13 @@ export default function AdminDashboardScreen() {
                             style={[
                               styles.filterPillText,
                               {
-                                color: isSelected ? colors.primaryForeground : colors.textPrimary,
-                                fontWeight: isSelected ? '600' : '500',
+                                color: isSelected
+                                  ? colors.primaryForeground
+                                  : colors.textPrimary,
+                                fontFamily: isSelected
+                                  ? typography.fonts.bodySemibold
+                                  : typography.fonts.bodyMedium,
+                                fontWeight: isSelected ? "600" : "500",
                               },
                             ]}
                           >
@@ -460,8 +592,16 @@ export default function AdminDashboardScreen() {
               <View style={styles.mobileList}>
                 {isLoading ? (
                   <View style={styles.stateContainer}>
-                    <ActivityIndicator size="small" color={colors.textPrimary} />
-                    <Text style={[styles.stateText, { color: colors.textSecondary }]}>
+                    <ActivityIndicator
+                      size="small"
+                      color={colors.textPrimary}
+                    />
+                    <Text
+                      style={[
+                        styles.stateText,
+                        { color: colors.textSecondary },
+                      ]}
+                    >
                       Loading user directory…
                     </Text>
                   </View>
@@ -470,40 +610,60 @@ export default function AdminDashboardScreen() {
                     <View style={styles.errorIconBadge}>
                       <AlertCircleIcon size={24} color={colors.danger} />
                     </View>
-                    <Text style={[styles.errorStateText, { color: colors.danger }]}>{errorMsg}</Text>
+                    <Text
+                      style={[styles.errorStateText, { color: colors.danger }]}
+                    >
+                      {errorMsg}
+                    </Text>
                     <TouchableOpacity
                       onPress={fetchUsers}
                       style={[styles.retryBtn, { borderColor: colors.border }]}
                     >
-                      <Text style={[styles.retryBtnText, { color: colors.textPrimary }]}>Try Again</Text>
+                      <Text
+                        style={[
+                          styles.retryBtnText,
+                          { color: colors.textPrimary },
+                        ]}
+                      >
+                        Try Again
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 ) : users.length === 0 ? (
                   <View style={styles.stateContainer}>
-                    <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No members found</Text>
-                    <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
+                    <Text
+                      style={[styles.emptyTitle, { color: colors.textPrimary }]}
+                    >
+                      No members found
+                    </Text>
+                    <Text
+                      style={[
+                        styles.emptySubtitle,
+                        { color: colors.textSecondary },
+                      ]}
+                    >
                       {searchTerm || selectedRole || selectedStatus
-                        ? 'Try adjusting your search query or active filters.'
-                        : 'No users have authenticated yet.'}
+                        ? "Try adjusting your search query or active filters."
+                        : "No users have authenticated yet."}
                     </Text>
                   </View>
                 ) : (
                   users.map((item, index) => {
                     const isLast = index === users.length - 1;
                     const joinedDate = item.createdAt
-                      ? new Date(item.createdAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
+                      ? new Date(item.createdAt).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
                         })
-                      : '—';
+                      : "—";
                     const lastLoginDate = item.lastLoginAt
-                      ? new Date(item.lastLoginAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
+                      ? new Date(item.lastLoginAt).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
                         })
-                      : 'Never';
+                      : "Never";
 
                     return (
                       <View
@@ -511,7 +671,9 @@ export default function AdminDashboardScreen() {
                         style={[
                           styles.mobileCard,
                           {
-                            backgroundColor: isDark ? colors.surfaceSecondary : colors.surface,
+                            backgroundColor: isDark
+                              ? colors.surfaceSecondary
+                              : colors.surface,
                             borderColor: colors.border,
                           },
                           isLast && styles.mobileCardLast,
@@ -519,12 +681,28 @@ export default function AdminDashboardScreen() {
                       >
                         {/* Top Row: Avatar + Name/Email + Role Badge */}
                         <View style={styles.mobileCardTopRow}>
-                          <Avatar uri={item.avatarUrl ?? undefined} name={item.name} size={40} />
+                          <Avatar
+                            uri={item.avatarUrl ?? undefined}
+                            name={item.name}
+                            size={40}
+                          />
                           <View style={styles.mobileUserInfo}>
-                            <Text style={[styles.mobileUserName, { color: colors.textPrimary }]} numberOfLines={1}>
-                              {item.name || 'Member'}
+                            <Text
+                              style={[
+                                styles.mobileUserName,
+                                { color: colors.textPrimary },
+                              ]}
+                              numberOfLines={1}
+                            >
+                              {item.name || "Member"}
                             </Text>
-                            <Text style={[styles.mobileUserEmail, { color: colors.textSecondary }]} numberOfLines={1}>
+                            <Text
+                              style={[
+                                styles.mobileUserEmail,
+                                { color: colors.textSecondary },
+                              ]}
+                              numberOfLines={1}
+                            >
                               {item.email}
                             </Text>
                           </View>
@@ -532,7 +710,12 @@ export default function AdminDashboardScreen() {
                         </View>
 
                         {/* Subtle Divider */}
-                        <View style={[styles.mobileCardDivider, { backgroundColor: colors.borderSubtle }]} />
+                        <View
+                          style={[
+                            styles.mobileCardDivider,
+                            { backgroundColor: colors.borderSubtle },
+                          ]}
+                        />
 
                         {/* Bottom Row: Status Indicator + Last Login Date */}
                         <View style={styles.mobileCardBottomRow}>
@@ -541,16 +724,31 @@ export default function AdminDashboardScreen() {
                               style={[
                                 styles.statusDot,
                                 {
-                                  backgroundColor: item.status === 'ACTIVE' ? colors.success : colors.textMuted,
+                                  backgroundColor:
+                                    item.status === "ACTIVE"
+                                      ? colors.success
+                                      : colors.textMuted,
                                 },
                               ]}
                             />
-                            <Text style={[styles.statusText, { color: colors.textPrimary }]}>
-                              {item.status === 'ACTIVE' ? 'Active' : 'Disabled'}
+                            <Text
+                              style={[
+                                styles.statusText,
+                                { color: colors.textPrimary },
+                              ]}
+                            >
+                              {item.status === "ACTIVE" ? "Active" : "Disabled"}
                             </Text>
                           </View>
-                          <Text style={[styles.mobileDateMeta, { color: colors.textSecondary }]}>
-                            {item.lastLoginAt ? `Active ${lastLoginDate}` : `Joined ${joinedDate}`}
+                          <Text
+                            style={[
+                              styles.mobileDateMeta,
+                              { color: colors.textSecondary },
+                            ]}
+                          >
+                            {item.lastLoginAt
+                              ? `Active ${lastLoginDate}`
+                              : `Joined ${joinedDate}`}
                           </Text>
                         </View>
                       </View>
@@ -576,19 +774,75 @@ export default function AdminDashboardScreen() {
                       },
                     ]}
                   >
-                    <Text style={[styles.th, styles.colUser, { color: colors.textSecondary }]}>USER</Text>
-                    <Text style={[styles.th, styles.colEmail, { color: colors.textSecondary }]}>EMAIL</Text>
-                    <Text style={[styles.th, styles.colRole, { color: colors.textSecondary }]}>ROLE</Text>
-                    <Text style={[styles.th, styles.colStatus, { color: colors.textSecondary }]}>STATUS</Text>
-                    <Text style={[styles.th, styles.colJoined, { color: colors.textSecondary }]}>JOINED</Text>
-                    <Text style={[styles.th, styles.colLastLogin, { color: colors.textSecondary }]}>LAST LOGIN</Text>
+                    <Text
+                      style={[
+                        styles.th,
+                        styles.colUser,
+                        { color: colors.textSecondary },
+                      ]}
+                    >
+                      USER
+                    </Text>
+                    <Text
+                      style={[
+                        styles.th,
+                        styles.colEmail,
+                        { color: colors.textSecondary },
+                      ]}
+                    >
+                      EMAIL
+                    </Text>
+                    <Text
+                      style={[
+                        styles.th,
+                        styles.colRole,
+                        { color: colors.textSecondary },
+                      ]}
+                    >
+                      ROLE
+                    </Text>
+                    <Text
+                      style={[
+                        styles.th,
+                        styles.colStatus,
+                        { color: colors.textSecondary },
+                      ]}
+                    >
+                      STATUS
+                    </Text>
+                    <Text
+                      style={[
+                        styles.th,
+                        styles.colJoined,
+                        { color: colors.textSecondary },
+                      ]}
+                    >
+                      JOINED
+                    </Text>
+                    <Text
+                      style={[
+                        styles.th,
+                        styles.colLastLogin,
+                        { color: colors.textSecondary },
+                      ]}
+                    >
+                      LAST LOGIN
+                    </Text>
                   </View>
 
                   {/* Table Body States */}
                   {isLoading ? (
                     <View style={styles.stateContainer}>
-                      <ActivityIndicator size="small" color={colors.textPrimary} />
-                      <Text style={[styles.stateText, { color: colors.textSecondary }]}>
+                      <ActivityIndicator
+                        size="small"
+                        color={colors.textPrimary}
+                      />
+                      <Text
+                        style={[
+                          styles.stateText,
+                          { color: colors.textSecondary },
+                        ]}
+                      >
                         Loading user directory…
                       </Text>
                     </View>
@@ -597,40 +851,72 @@ export default function AdminDashboardScreen() {
                       <View style={styles.errorIconBadge}>
                         <AlertCircleIcon size={24} color={colors.danger} />
                       </View>
-                      <Text style={[styles.errorStateText, { color: colors.danger }]}>{errorMsg}</Text>
+                      <Text
+                        style={[
+                          styles.errorStateText,
+                          { color: colors.danger },
+                        ]}
+                      >
+                        {errorMsg}
+                      </Text>
                       <TouchableOpacity
                         onPress={fetchUsers}
-                        style={[styles.retryBtn, { borderColor: colors.border }]}
+                        style={[
+                          styles.retryBtn,
+                          { borderColor: colors.border },
+                        ]}
                       >
-                        <Text style={[styles.retryBtnText, { color: colors.textPrimary }]}>Try Again</Text>
+                        <Text
+                          style={[
+                            styles.retryBtnText,
+                            { color: colors.textPrimary },
+                          ]}
+                        >
+                          Try Again
+                        </Text>
                       </TouchableOpacity>
                     </View>
                   ) : users.length === 0 ? (
                     <View style={styles.stateContainer}>
-                      <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No members found</Text>
-                      <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
+                      <Text
+                        style={[
+                          styles.emptyTitle,
+                          { color: colors.textPrimary },
+                        ]}
+                      >
+                        No members found
+                      </Text>
+                      <Text
+                        style={[
+                          styles.emptySubtitle,
+                          { color: colors.textSecondary },
+                        ]}
+                      >
                         {searchTerm || selectedRole || selectedStatus
-                          ? 'Try adjusting your search query or active filters.'
-                          : 'No users have authenticated yet.'}
+                          ? "Try adjusting your search query or active filters."
+                          : "No users have authenticated yet."}
                       </Text>
                     </View>
                   ) : (
                     users.map((item, index) => {
                       const isLast = index === users.length - 1;
                       const joinedDate = item.createdAt
-                        ? new Date(item.createdAt).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
+                        ? new Date(item.createdAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
                           })
-                        : '—';
+                        : "—";
                       const lastLoginDate = item.lastLoginAt
-                        ? new Date(item.lastLoginAt).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                          })
-                        : '—';
+                        ? new Date(item.lastLoginAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            },
+                          )
+                        : "—";
 
                       return (
                         <View
@@ -644,16 +930,34 @@ export default function AdminDashboardScreen() {
                           ]}
                         >
                           {/* User column (Avatar + Name) */}
-                          <View style={[styles.td, styles.colUser, styles.userCell]}>
-                            <Avatar uri={item.avatarUrl ?? undefined} name={item.name} size={32} />
-                            <Text style={[styles.userNameText, { color: colors.textPrimary }]} numberOfLines={1}>
-                              {item.name || 'Member'}
+                          <View
+                            style={[styles.td, styles.colUser, styles.userCell]}
+                          >
+                            <Avatar
+                              uri={item.avatarUrl ?? undefined}
+                              name={item.name}
+                              size={32}
+                            />
+                            <Text
+                              style={[
+                                styles.userNameText,
+                                { color: colors.textPrimary },
+                              ]}
+                              numberOfLines={1}
+                            >
+                              {item.name || "Member"}
                             </Text>
                           </View>
 
                           {/* Email */}
                           <View style={[styles.td, styles.colEmail]}>
-                            <Text style={[styles.emailText, { color: colors.textPrimary }]} numberOfLines={1}>
+                            <Text
+                              style={[
+                                styles.emailText,
+                                { color: colors.textPrimary },
+                              ]}
+                              numberOfLines={1}
+                            >
                               {item.email}
                             </Text>
                           </View>
@@ -670,24 +974,48 @@ export default function AdminDashboardScreen() {
                                 style={[
                                   styles.statusDot,
                                   {
-                                    backgroundColor: item.status === 'ACTIVE' ? colors.success : colors.textMuted,
+                                    backgroundColor:
+                                      item.status === "ACTIVE"
+                                        ? colors.success
+                                        : colors.textMuted,
                                   },
                                 ]}
                               />
-                              <Text style={[styles.statusText, { color: colors.textPrimary }]}>
-                                {item.status === 'ACTIVE' ? 'Active' : 'Disabled'}
+                              <Text
+                                style={[
+                                  styles.statusText,
+                                  { color: colors.textPrimary },
+                                ]}
+                              >
+                                {item.status === "ACTIVE"
+                                  ? "Active"
+                                  : "Disabled"}
                               </Text>
                             </View>
                           </View>
 
                           {/* Joined */}
                           <View style={[styles.td, styles.colJoined]}>
-                            <Text style={[styles.dateText, { color: colors.textSecondary }]}>{joinedDate}</Text>
+                            <Text
+                              style={[
+                                styles.dateText,
+                                { color: colors.textSecondary },
+                              ]}
+                            >
+                              {joinedDate}
+                            </Text>
                           </View>
 
                           {/* Last Login */}
                           <View style={[styles.td, styles.colLastLogin]}>
-                            <Text style={[styles.dateText, { color: colors.textSecondary }]}>{lastLoginDate}</Text>
+                            <Text
+                              style={[
+                                styles.dateText,
+                                { color: colors.textSecondary },
+                              ]}
+                            >
+                              {lastLoginDate}
+                            </Text>
                           </View>
                         </View>
                       );
@@ -709,11 +1037,21 @@ export default function AdminDashboardScreen() {
                   isCompact && styles.paginationFooterCompact,
                 ]}
               >
-                <Text style={[styles.paginationCountText, { color: colors.textSecondary }]}>
+                <Text
+                  style={[
+                    styles.paginationCountText,
+                    { color: colors.textSecondary },
+                  ]}
+                >
                   {paginationInfo}
                 </Text>
 
-                <View style={[styles.paginationButtons, isCompact && styles.paginationButtonsCompact]}>
+                <View
+                  style={[
+                    styles.paginationButtons,
+                    isCompact && styles.paginationButtonsCompact,
+                  ]}
+                >
                   <TouchableOpacity
                     onPress={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={!pagination.hasPreviousPage || isLoading}
@@ -723,29 +1061,30 @@ export default function AdminDashboardScreen() {
                         backgroundColor: colors.surfaceSecondary,
                         borderColor: colors.border,
                       },
-                      (!pagination.hasPreviousPage || isLoading) && styles.pageBtnDisabled,
+                      (!pagination.hasPreviousPage || isLoading) &&
+                        styles.pageBtnDisabled,
                     ]}
                   >
                     <View style={styles.pageBtnContent}>
                       <ChevronLeftIcon
                         size={10}
-                        color={!pagination.hasPreviousPage || isLoading ? colors.textMuted : colors.textPrimary}
+                        color={
+                          !pagination.hasPreviousPage || isLoading
+                            ? colors.textMuted
+                            : colors.textPrimary
+                        }
                       />
-                      <Text
-                        style={[
-                          styles.pageBtnText,
-                          { color: colors.textPrimary },
-                          (!pagination.hasPreviousPage || isLoading) && { color: colors.textMuted },
-                        ]}
-                      >
-                        Previous
-                      </Text>
                     </View>
                   </TouchableOpacity>
 
                   <View style={styles.pageNumberBadge}>
-                    <Text style={[styles.pageNumberText, { color: colors.textSecondary }]}>
-                      Page {pagination.currentPage} of {pagination.totalPages}
+                    <Text
+                      style={[
+                        styles.pageNumberText,
+                        { color: colors.textSecondary },
+                      ]}
+                    >
+                      {pagination.currentPage} / {pagination.totalPages}
                     </Text>
                   </View>
 
@@ -762,22 +1101,18 @@ export default function AdminDashboardScreen() {
                         backgroundColor: colors.surfaceSecondary,
                         borderColor: colors.border,
                       },
-                      (!pagination.hasNextPage || isLoading) && styles.pageBtnDisabled,
+                      (!pagination.hasNextPage || isLoading) &&
+                        styles.pageBtnDisabled,
                     ]}
                   >
                     <View style={styles.pageBtnContent}>
-                      <Text
-                        style={[
-                          styles.pageBtnText,
-                          { color: colors.textPrimary },
-                          (!pagination.hasNextPage || isLoading) && { color: colors.textMuted },
-                        ]}
-                      >
-                        Next
-                      </Text>
                       <ChevronRightIcon
                         size={10}
-                        color={!pagination.hasNextPage || isLoading ? colors.textMuted : colors.textPrimary}
+                        color={
+                          !pagination.hasNextPage || isLoading
+                            ? colors.textMuted
+                            : colors.textPrimary
+                        }
                       />
                     </View>
                   </TouchableOpacity>
@@ -804,11 +1139,11 @@ export default function AdminDashboardScreen() {
       <MobileFilterSheet
         visible={mobileFilterVisible}
         onClose={() => setMobileFilterVisible(false)}
-        selectedRole={selectedRole || 'ALL'}
-        selectedStatus={selectedStatus || 'ALL'}
+        selectedRole={selectedRole || "ALL"}
+        selectedStatus={selectedStatus || "ALL"}
         onApply={(role, status) => {
-          setSelectedRole(role === 'ALL' ? undefined : role);
-          setSelectedStatus(status === 'ALL' ? undefined : status);
+          setSelectedRole(role === "ALL" ? undefined : role);
+          setSelectedStatus(status === "ALL" ? undefined : status);
           setCurrentPage(1);
         }}
         onReset={() => {
@@ -826,9 +1161,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderBottomWidth: 1,
@@ -838,31 +1173,29 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
   brandName: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: "700",
     letterSpacing: 2.2,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   adminIndicator: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 9999,
-    borderWidth: 1,
+    paddingHorizontal: 3,
     marginLeft: 4,
   },
   adminIndicatorText: {
+    fontFamily: typography.fonts.bodyBold,
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: "700",
     letterSpacing: 0.8,
   },
   headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
   avatarButton: {
@@ -875,8 +1208,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   signOutText: {
+    fontFamily: typography.fonts.bodySemibold,
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
     letterSpacing: 0.2,
   },
   scrollContent: {
@@ -890,8 +1224,8 @@ const styles = StyleSheet.create({
   },
   container: {
     maxWidth: 1120,
-    width: '100%',
-    alignSelf: 'center',
+    width: "100%",
+    alignSelf: "center",
     gap: 20,
   },
   containerCompact: {
@@ -901,15 +1235,17 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   pageTitle: {
-    fontSize: 26,
-    fontWeight: '700',
+    fontFamily: typography.fonts.heading,
+    fontSize: 32,
+    fontWeight: "400",
     letterSpacing: -0.5,
   },
   pageTitleCompact: {
-    fontSize: 22,
+    fontSize: 28,
     letterSpacing: -0.3,
   },
   pageDescription: {
+    fontFamily: typography.fonts.body,
     fontSize: 14,
     lineHeight: 20,
   },
@@ -920,8 +1256,8 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   searchWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 1,
     borderRadius: 9999,
     paddingHorizontal: 14,
@@ -932,21 +1268,22 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
+    fontFamily: typography.fonts.body,
     fontSize: 14,
   },
   clearSearchBtn: {
     padding: 4,
   },
   mobileFilterBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     gap: 10,
     paddingTop: 2,
   },
   mobileFilterTriggerBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     paddingHorizontal: 14,
     paddingVertical: 8,
@@ -954,17 +1291,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   mobileFilterTriggerText: {
+    fontFamily: typography.fonts.bodySemibold,
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   mobilePerPageGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   perPageLabel: {
+    fontFamily: typography.fonts.bodySemibold,
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   mobilePerPagePill: {
     paddingHorizontal: 8,
@@ -973,29 +1312,32 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   mobilePerPagePillText: {
+    fontFamily: typography.fonts.body,
     fontSize: 11,
   },
   filtersScrollView: {
-    width: '100%',
+    width: "100%",
   },
   filtersScrollContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     gap: 20,
   },
   filtersRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 20,
   },
   filterGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   filterLabel: {
+    fontFamily: typography.fonts.heading,
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: "700",
     letterSpacing: 0.8,
     marginRight: 2,
   },
@@ -1006,39 +1348,41 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   filterPillText: {
+    fontFamily: typography.fonts.bodyMedium,
     fontSize: 12,
   },
   tableCard: {
     borderWidth: 1,
     borderRadius: 16,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   tableScrollInner: {
-    minWidth: '100%',
+    minWidth: "100%",
     flexGrow: 1,
   },
   table: {
-    width: '100%',
+    width: "100%",
     minWidth: 860,
   },
   tableHeaderRow: {
-    width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
     borderBottomWidth: 1,
     paddingVertical: 12,
     paddingHorizontal: 20,
   },
   th: {
+    fontFamily: typography.fonts.bodyBold,
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: "700",
     letterSpacing: 1,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   tableRow: {
-    width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
@@ -1047,7 +1391,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
   },
   td: {
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   colUser: {
     flex: 2.2,
@@ -1079,21 +1423,23 @@ const styles = StyleSheet.create({
     minWidth: 120,
   },
   userCell: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   userNameText: {
+    fontFamily: typography.fonts.bodySemibold,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     flex: 1,
   },
   emailText: {
+    fontFamily: typography.fonts.body,
     fontSize: 13,
   },
   statusCell: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   statusDot: {
@@ -1102,24 +1448,28 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   statusText: {
+    fontFamily: typography.fonts.body,
     fontSize: 13,
   },
   dateText: {
+    fontFamily: typography.fonts.body,
     fontSize: 13,
   },
   stateContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 44,
     gap: 12,
   },
   stateText: {
+    fontFamily: typography.fonts.body,
     fontSize: 13,
   },
   errorIconBadge: {
     marginBottom: 4,
   },
   errorStateText: {
+    fontFamily: typography.fonts.body,
     fontSize: 14,
   },
   retryBtn: {
@@ -1130,32 +1480,36 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   retryBtnText: {
+    fontFamily: typography.fonts.bodySemibold,
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   emptyTitle: {
+    fontFamily: typography.fonts.bodySemibold,
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   emptySubtitle: {
+    fontFamily: typography.fonts.body,
     fontSize: 13,
   },
   paginationFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderTopWidth: 1,
-    flexWrap: 'wrap',
+    flexWrap: "wrap",
     gap: 14,
   },
   paginationCountText: {
+    fontFamily: typography.fonts.body,
     fontSize: 13,
   },
   paginationButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   pageBtn: {
@@ -1165,34 +1519,36 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   pageBtnContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   pageBtnDisabled: {
     opacity: 0.4,
   },
   pageBtnText: {
+    fontFamily: typography.fonts.bodySemibold,
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   pageNumberBadge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
   pageNumberText: {
+    fontFamily: typography.fonts.bodyMedium,
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   paginationFooterCompact: {
-    flexDirection: 'column',
-    alignItems: 'center',
+    flexDirection: "column",
+    alignItems: "center",
     gap: 10,
     paddingHorizontal: 16,
   },
   paginationButtonsCompact: {
-    width: '100%',
-    justifyContent: 'space-between',
+    width: "100%",
+    justifyContent: "space-between",
   },
   mobileList: {
     padding: 14,
@@ -1208,8 +1564,8 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   mobileCardTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   mobileUserInfo: {
@@ -1217,22 +1573,25 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   mobileUserName: {
+    fontFamily: typography.fonts.bodySemibold,
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   mobileUserEmail: {
+    fontFamily: typography.fonts.body,
     fontSize: 12,
   },
   mobileCardDivider: {
     height: 1,
-    width: '100%',
+    width: "100%",
   },
   mobileCardBottomRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   mobileDateMeta: {
+    fontFamily: typography.fonts.body,
     fontSize: 12,
   },
 });
