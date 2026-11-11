@@ -1,6 +1,6 @@
 import React from 'react';
 import { Image, View, Text, StyleSheet } from 'react-native';
-import { colors, fonts } from '@/constants/theme';
+import { useTheme } from '@/theme';
 
 interface Props {
   uri?: string;
@@ -9,6 +9,8 @@ interface Props {
 }
 
 export function Avatar({ uri, name, size = 48 }: Props) {
+  const { colors } = useTheme();
+
   const initials = name
     ? name
         .split(' ')
@@ -28,6 +30,8 @@ export function Avatar({ uri, name, size = 48 }: Props) {
           width: size,
           height: size,
           borderRadius: size / 2,
+          backgroundColor: colors.surfaceSecondary,
+          borderColor: colors.border,
         },
       ]}
       accessibilityLabel={`${name ?? 'User'} avatar`}
@@ -40,10 +44,20 @@ export function Avatar({ uri, name, size = 48 }: Props) {
           width: size,
           height: size,
           borderRadius: size / 2,
+          backgroundColor: colors.surfaceSecondary,
+          borderColor: colors.border,
         },
       ]}
     >
-      <Text style={[styles.initials, { fontSize: Math.max(11, size * 0.36) }]}>
+      <Text
+        style={[
+          styles.initials,
+          {
+            fontSize: Math.max(11, size * 0.36),
+            color: colors.textPrimary,
+          },
+        ]}
+      >
         {initials}
       </Text>
     </View>
@@ -52,21 +66,15 @@ export function Avatar({ uri, name, size = 48 }: Props) {
 
 const styles = StyleSheet.create({
   image: {
-    backgroundColor: colors.surfaceGrey,
     borderWidth: 1,
-    borderColor: colors.hairline,
   },
   placeholder: {
-    backgroundColor: colors.stone,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: colors.hairline,
   },
   initials: {
-    color: colors.onStone,
-    fontFamily: fonts.sans,
-    fontWeight: '500',
+    fontWeight: '700',
     letterSpacing: 0.5,
   },
 });

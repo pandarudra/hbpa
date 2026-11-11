@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, type ViewStyle } from 'react-native';
+import { Sun, Moon, Monitor } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
 
 export interface IconProps {
@@ -253,6 +254,119 @@ export function ChevronRightIcon({
     </View>
   );
 }
+
+/** Minimalist Down Directional Chevron */
+export function ChevronDownIcon({
+  size = 12,
+  color = colors.stone,
+  strokeWidth = 1.75,
+  style,
+}: IconProps) {
+  const arm = Math.round(size * 0.48);
+
+  return (
+    <View
+      style={[
+        styles.iconContainer,
+        { width: size, height: size },
+        style,
+      ]}
+      accessibilityRole="image"
+    >
+      <View
+        style={{
+          width: arm,
+          height: arm,
+          borderRightWidth: strokeWidth,
+          borderBottomWidth: strokeWidth,
+          borderColor: color,
+          transform: [{ rotate: '45deg' }, { translateY: -Math.round(size * 0.1) }],
+        }}
+      />
+    </View>
+  );
+}
+
+/** Minimalist Funnel / Filter Icon */
+export function FilterIcon({
+  size = 16,
+  color = colors.stone,
+  strokeWidth = 1.75,
+  style,
+}: IconProps) {
+  const gap = Math.max(2, Math.round(size * 0.14));
+
+  return (
+    <View
+      style={[
+        styles.iconContainer,
+        { width: size, height: size, justifyContent: 'center', alignItems: 'center' },
+        style,
+      ]}
+      accessibilityRole="image"
+      accessibilityLabel="Filter"
+    >
+      <View
+        style={{
+          width: Math.round(size * 0.85),
+          height: strokeWidth,
+          backgroundColor: color,
+          borderRadius: strokeWidth / 2,
+          marginBottom: gap,
+        }}
+      />
+      <View
+        style={{
+          width: Math.round(size * 0.54),
+          height: strokeWidth,
+          backgroundColor: color,
+          borderRadius: strokeWidth / 2,
+          marginBottom: gap,
+        }}
+      />
+      <View
+        style={{
+          width: Math.round(size * 0.26),
+          height: strokeWidth,
+          backgroundColor: color,
+          borderRadius: strokeWidth / 2,
+        }}
+      />
+    </View>
+  );
+}
+
+/** Lucide Sun Icon for Light Mode */
+export function SunIcon({
+  size = 16,
+  color = colors.stone,
+  strokeWidth = 1.75,
+  style,
+}: IconProps) {
+  return <Sun size={size} color={color} strokeWidth={strokeWidth} style={style} />;
+}
+
+/** Lucide Moon Icon for Dark Mode */
+export function MoonIcon({
+  size = 16,
+  color = colors.stone,
+  strokeWidth = 1.75,
+  style,
+}: IconProps) {
+  return <Moon size={size} color={color} strokeWidth={strokeWidth} style={style} />;
+}
+
+/** Lucide Monitor Icon for System Theme */
+export function MonitorIcon({
+  size = 16,
+  color = colors.stone,
+  strokeWidth = 1.75,
+  style,
+}: IconProps) {
+  return <Monitor size={size} color={color} strokeWidth={strokeWidth} style={style} />;
+}
+
+export { Sun, Moon, Monitor };
 
 const styles = StyleSheet.create({
   iconContainer: {

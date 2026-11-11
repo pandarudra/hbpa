@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,16 +6,23 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Platform,
+  useWindowDimensions,
 } from 'react-native';
 import { Redirect } from 'expo-router';
 import { useAuth } from '@/providers/AuthProvider';
 import toast from 'react-hot-toast';
 import { Avatar } from '@/components/common/Avatar';
 import { HorizonIcon } from '@/components/common/HorizonIcon';
-import { colors, fonts, rounded, spacing } from '@/constants/theme';
+import { ThemeToggle } from '@/components/common/ThemeToggle';
+import { ProfileMenuModal } from '@/components/common/ProfileMenuModal';
+import { useTheme } from '@/theme';
 
 export default function DashboardScreen() {
   const { user, signOut } = useAuth();
+  const { width } = useWindowDimensions();
+  const { colors } = useTheme();
+  const isCompact = width < 768;
+  const [profileMenuVisible, setProfileMenuVisible] = useState(false);
 
   if (!user) return null;
 
@@ -32,50 +39,113 @@ export default function DashboardScreen() {
   const displayName = user.name ? user.name.split(' ')[0] : 'Member';
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView
+      style={[
+        styles.safe,
+        { backgroundColor: colors.background },
+      ]}
+    >
       {/* 1. Application Header */}
-      <View style={styles.header}>
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: colors.surface,
+            borderBottomColor: colors.border,
+          },
+          isCompact && styles.headerCompact,
+        ]}
+      >
         {/* Left: Horizon logo & brand name */}
         <View style={styles.headerLeft}>
-          <HorizonIcon size={26} variant="filled" />
-          <Text style={styles.brandName}>HORIZON</Text>
+          <HorizonIcon size={isCompact ? 24 : 26} variant="filled" />
+          <Text style={[styles.brandName, { color: colors.textPrimary }]}>HORIZON</Text>
         </View>
 
-        {/* Right: User avatar & Single Sign Out button */}
+        {/* Right: Theme Toggle + User Avatar (opens ProfileMenu) + Sign Out */}
         <View style={styles.headerRight}>
-          <Avatar uri={user.avatarUrl} name={user.name} size={34} />
+          <ThemeToggle size={34} />
+
+          <TouchableOpacity
+            onPress={() => setProfileMenuVisible(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Open user menu"
+            activeOpacity={0.8}
+            style={styles.avatarButton}
+          >
+            <Avatar uri={user.avatarUrl} name={user.name} size={isCompact ? 32 : 34} />
+          </TouchableOpacity>
+
           <TouchableOpacity
             onPress={handleSignOut}
-            style={styles.signOutBtn}
+            style={[
+              styles.signOutBtn,
+              {
+                backgroundColor: colors.surfaceSecondary,
+                borderColor: colors.border,
+              },
+            ]}
             accessibilityLabel="Sign out"
             accessibilityRole="button"
             activeOpacity={0.8}
           >
-            <Text style={styles.signOutText}>Sign Out</Text>
+            <Text style={[styles.signOutText, { color: colors.textPrimary }]}>Sign Out</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {/* 2. Main Content: Centered Minimal Welcome Experience (Strictly No-Scroll) */}
-      <View style={styles.mainContainer}>
+      <View style={[styles.mainContainer, isCompact && styles.mainContainerCompact]}>
         <View style={styles.welcomeBox}>
           {/* Eyebrow Label */}
-          <View style={styles.eyebrowRow}>
-            <View style={styles.eyebrowDot} />
-            <Text style={styles.eyebrowText}>WELCOME TO HORIZON</Text>
+          <View
+            style={[
+              styles.eyebrowRow,
+              {
+                backgroundColor: colors.successBg,
+                borderColor: colors.successBorder,
+              },
+            ]}
+          >
+            <View style={[styles.eyebrowDot, { backgroundColor: colors.success }]} />
+            <Text style={[styles.eyebrowText, { color: colors.success }]}>WELCOME TO HORIZON</Text>
           </View>
 
           {/* Heading */}
-          <Text style={styles.welcomeHeading}>
+          <Text
+            style={[
+              styles.welcomeHeading,
+              { color: colors.textPrimary },
+              isCompact && styles.welcomeHeadingCompact,
+            ]}
+          >
             Welcome back, {displayName}.
           </Text>
 
           {/* Confirmation sentence */}
-          <Text style={styles.confirmationText}>
+          <Text
+            style={[
+              styles.confirmationText,
+              { color: colors.textSecondary },
+              isCompact && styles.confirmationTextCompact,
+            ]}
+          >
             Your official organization account is successfully authenticated.
           </Text>
         </View>
       </View>
+
+      {/* Profile & Appearance Menu Popover (Ref Screenshot 3) */}
+      <ProfileMenuModal
+        visible={profileMenuVisible}
+        onClose={() => setProfileMenuVisible(false)}
+        user={{
+          displayName: user.name,
+          email: user.email,
+          role: user.role,
+        }}
+        onSignOut={handleSignOut}
+      />
     </SafeAreaView>
   );
 }
@@ -83,7 +153,6 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colors.canvas,
     // Ensure viewport-fitting 100dvh on Web, flex: 1 on mobile
     ...(Platform.OS === 'web'
       ? {
@@ -97,55 +166,58 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    backgroundColor: colors.canvas,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: colors.hairline,
+  },
+  headerCompact: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
   },
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xs,
+    gap: 10,
   },
   brandName: {
-    fontFamily: fonts.serif,
-    fontSize: 15,
-    fontWeight: '300',
-    letterSpacing: 2.5,
-    color: colors.stone,
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: 2.2,
     textTransform: 'uppercase',
   },
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
+    gap: 10,
+  },
+  avatarButton: {
+    borderRadius: 9999,
   },
   signOutBtn: {
-    paddingHorizontal: spacing.sm + 4,
-    paddingVertical: spacing.xxs + 3,
-    borderRadius: rounded.full,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 9999,
     borderWidth: 1,
-    borderColor: colors.stone,
-    backgroundColor: colors.canvas,
   },
   signOutText: {
-    color: colors.stone,
-    fontFamily: fonts.sans,
     fontSize: 12,
     fontWeight: '600',
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
   },
   mainContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: spacing.xl,
-    paddingBottom: spacing.xxl,
+    paddingHorizontal: 24,
+    paddingBottom: 48,
+  },
+  mainContainerCompact: {
+    paddingHorizontal: 20,
+    paddingBottom: 24,
   },
   welcomeBox: {
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: 12,
     maxWidth: 580,
     width: '100%',
   },
@@ -154,37 +226,43 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     alignSelf: 'center',
-    marginBottom: spacing.xxs,
+    marginBottom: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 9999,
+    borderWidth: 1,
   },
   eyebrowDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: colors.forest,
   },
   eyebrowText: {
-    fontFamily: fonts.sans,
     fontSize: 11,
     fontWeight: '700',
-    letterSpacing: 1.5,
-    color: colors.olive,
+    letterSpacing: 1.2,
     textTransform: 'uppercase',
   },
   welcomeHeading: {
-    fontFamily: fonts.serif,
-    fontSize: Platform.select({ web: 38, default: 32 }),
-    fontWeight: '300',
-    color: colors.ink,
+    fontSize: Platform.select({ web: 36, default: 30 }),
+    fontWeight: '700',
     textAlign: 'center',
-    letterSpacing: -0.3,
-    lineHeight: Platform.select({ web: 46, default: 40 }),
+    letterSpacing: -0.6,
+    lineHeight: Platform.select({ web: 44, default: 38 }),
+  },
+  welcomeHeadingCompact: {
+    fontSize: 26,
+    lineHeight: 34,
+    letterSpacing: -0.4,
   },
   confirmationText: {
-    fontFamily: fonts.sans,
     fontSize: 15,
     lineHeight: 22,
-    color: colors.stone,
     textAlign: 'center',
     maxWidth: 420,
+  },
+  confirmationTextCompact: {
+    fontSize: 14,
+    lineHeight: 20,
   },
 });

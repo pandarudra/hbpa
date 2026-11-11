@@ -31,7 +31,7 @@ const webToastOptions = {
     fontSize: '14px',
     fontWeight: '400',
     lineHeight: '1.4',
-    boxShadow: '0 8px 24px rgba(57, 34, 30, 0.09)',
+    boxShadow: '0 8px 24px rgba(15, 23, 42, 0.08)',
   },
   success: {
     duration: 3500,

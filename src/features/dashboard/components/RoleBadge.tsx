@@ -1,37 +1,26 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import type { UserRole } from '@/features/authentication/types/auth.types';
-import { colors, fonts, rounded, spacing } from '@/constants/theme';
-
-const ROLE_CONFIG: Record<
-  UserRole,
-  { label: string; bg: string; color: string; border: string }
-> = {
-  ADMIN: {
-    label: 'Admin',
-    bg: colors.goldBg,
-    color: colors.gold,
-    border: colors.goldPale,
-  },
-  USER: {
-    label: 'Member',
-    bg: colors.sageBg,
-    color: colors.olive,
-    border: colors.sagePale,
-  },
-};
+import { useTheme } from '@/theme';
 
 export function RoleBadge({ role }: { role: UserRole }) {
-  const config = ROLE_CONFIG[role] ?? ROLE_CONFIG.USER;
+  const { colors } = useTheme();
+
+  const isAdmin = role === 'ADMIN';
+  const label = isAdmin ? 'Admin' : 'Member';
+  const bg = isAdmin ? colors.roleAdminBg : colors.roleUserBg;
+  const color = isAdmin ? colors.roleAdminText : colors.roleUserText;
+  const border = isAdmin ? colors.roleAdminBorder : colors.roleUserBorder;
+
   return (
     <View
       style={[
         styles.badge,
-        { backgroundColor: config.bg, borderColor: config.border },
+        { backgroundColor: bg, borderColor: border },
       ]}
     >
-      <View style={[styles.dot, { backgroundColor: config.color }]} />
-      <Text style={[styles.label, { color: config.color }]}>{config.label}</Text>
+      <View style={[styles.dot, { backgroundColor: color }]} />
+      <Text style={[styles.label, { color }]}>{label}</Text>
     </View>
   );
 }
@@ -41,9 +30,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xxs + 1,
-    borderRadius: rounded.full,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 9999,
     borderWidth: 1,
     alignSelf: 'flex-start',
   },
@@ -53,8 +42,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   label: {
-    fontFamily: fonts.sans,
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
     letterSpacing: 0.8,
     textTransform: 'uppercase',

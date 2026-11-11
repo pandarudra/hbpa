@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,28 +8,30 @@ import {
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
-} from "react-native";
-import config from "@/constants/config";
-import { useAuth } from "@/providers/AuthProvider";
-import toast from "react-hot-toast";
-import { GoogleSignInButton } from "@/features/authentication/components/GoogleSignInButton";
-import { AuthErrorMessage } from "@/features/authentication/components/AuthErrorMessage";
-import { LoginSuccessAnimation } from "@/features/authentication/components/LoginSuccessAnimation";
-import { HorizonIcon } from "@/components/common/HorizonIcon";
-import { authApi } from "@/features/authentication/services/authApi";
-import type { AppUser } from "@/features/authentication/types/auth.types";
-import { colors, fonts, rounded, spacing, shadows } from "@/constants/theme";
+} from 'react-native';
+import config from '@/constants/config';
+import { useAuth } from '@/providers/AuthProvider';
+import toast from 'react-hot-toast';
+import { GoogleSignInButton } from '@/features/authentication/components/GoogleSignInButton';
+import { AuthErrorMessage } from '@/features/authentication/components/AuthErrorMessage';
+import { LoginSuccessAnimation } from '@/features/authentication/components/LoginSuccessAnimation';
+import { HorizonIcon } from '@/components/common/HorizonIcon';
+import { ThemeToggle } from '@/components/common/ThemeToggle';
+import { authApi } from '@/features/authentication/services/authApi';
+import type { AppUser } from '@/features/authentication/types/auth.types';
+import { useTheme } from '@/theme';
 
 export default function LoginScreen() {
   const { signIn, isLoading, error, clearError } = useAuth();
   const { width } = useWindowDimensions();
-  const isWide = width > 600;
+  const { colors, isDark } = useTheme();
+  const isDesktop = width >= 768;
   const [verifiedUser, setVerifiedUser] = useState<AppUser | null>(null);
 
   const [allowedDomains, setAllowedDomains] = useState<string[]>(
     config.allowedDomains.length > 0
       ? config.allowedDomains
-      : ["hbplus.fit", "outr.ac.in"],
+      : ['hbplus.fit', 'outr.ac.in'],
   );
 
   useEffect(() => {
@@ -47,8 +49,8 @@ export default function LoginScreen() {
 
   const allowedDomainsList =
     allowedDomains.length > 0
-      ? allowedDomains.map((d) => `@${d}`).join(", ")
-      : "@hbplus.fit, @outr.ac.in";
+      ? allowedDomains.map((d) => `@${d}`).join(', ')
+      : '@hbplus.fit, @outr.ac.in';
 
   // Trigger matching toast on error via react-hot-toast
   useEffect(() => {
@@ -60,25 +62,48 @@ export default function LoginScreen() {
   const handleSignIn = async () => {
     await signIn(async (user: AppUser) => {
       setVerifiedUser(user);
-      const userDomain = user.email ? user.email.split("@")[1] : "";
-      toast.success(`Welcome, ${user.name.split(" ")[0]} (@${userDomain})`);
+      const userDomain = user.email ? user.email.split('@')[1] : '';
+      toast.success(`Welcome, ${user.name.split(' ')[0]} (@${userDomain})`);
       // Wait for the animated tick to finish playing
       await new Promise((resolve) => setTimeout(resolve, 1400));
     });
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
+      {/* Top Utility Bar for Theme Toggle */}
+      <View style={styles.topBar}>
+        <View style={styles.topBarSpacer} />
+        <ThemeToggle size={38} />
+      </View>
+
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
-          contentContainerStyle={[styles.scroll, isWide && styles.scrollWide]}
+          contentContainerStyle={[
+            styles.scroll,
+            isDesktop ? styles.scrollDesktop : styles.scrollMobile,
+          ]}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Authentication Card (ex-auth-form-card) */}
-          <View style={[styles.card, isWide && styles.cardWide]}>
+          {/* Authentication Container (Native mobile screen on phones, elevated floating card on desktop) */}
+          <View
+            style={[
+              styles.card,
+              isDesktop
+                ? [
+                    styles.cardDesktop,
+                    {
+                      backgroundColor: colors.surface,
+                      borderColor: colors.border,
+                      shadowColor: isDark ? '#000000' : '#0F172A',
+                    },
+                  ]
+                : styles.cardMobile,
+            ]}
+          >
             {verifiedUser ? (
               <LoginSuccessAnimation
                 name={verifiedUser.name}
@@ -88,20 +113,19 @@ export default function LoginScreen() {
               <>
                 {/* Minimalist Emblem */}
                 <View style={styles.emblemContainer}>
-                  <HorizonIcon size={48} variant="filled" />
-                  <Text style={styles.wordmark}>HORIZON</Text>
+                  <HorizonIcon size={52} variant="filled" />
+                  <Text style={[styles.wordmark, { color: colors.textPrimary }]}>HORIZON</Text>
                 </View>
 
                 {/* Typography Header */}
                 <View style={styles.textGroup}>
-                  <Text style={styles.heading}>Welcome back</Text>
-                  <Text style={styles.subheading}>
-                    Sign in using your official organization Google account to
-                    continue.
+                  <Text style={[styles.heading, { color: colors.textPrimary }]}>Welcome back</Text>
+                  <Text style={[styles.subheading, { color: colors.textSecondary }]}>
+                    Sign in using your official organization Google account to continue.
                   </Text>
                 </View>
 
-                {/* Error Message in Card */}
+                {/* Error Message */}
                 {error && (
                   <AuthErrorMessage
                     code={error.code}
@@ -110,17 +134,25 @@ export default function LoginScreen() {
                   />
                 )}
 
-                {/* Primary Action Button with real Google icon */}
+                {/* Primary Action Button */}
                 <GoogleSignInButton
                   onPress={handleSignIn}
                   isLoading={isLoading}
                   style={styles.actionButton}
                 />
 
-                {/* Domain Security Policy Note */}
-                <View style={styles.policyNotice}>
-                  <View style={styles.policyIconDot} />
-                  <Text style={styles.policyText}>
+                {/* Domain Security Policy Badge */}
+                <View
+                  style={[
+                    styles.policyNotice,
+                    {
+                      backgroundColor: colors.successBg,
+                      borderColor: colors.successBorder,
+                    },
+                  ]}
+                >
+                  <View style={[styles.policyIconDot, { backgroundColor: colors.success }]} />
+                  <Text style={[styles.policyText, { color: colors.success }]}>
                     Access is exclusively to {allowedDomainsList}
                   </Text>
                 </View>
@@ -136,138 +168,108 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colors.canvas,
+  },
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'web' ? 14 : 6,
+    paddingBottom: 4,
+    zIndex: 10,
+  },
+  topBarSpacer: {
+    flex: 1,
   },
   flex: {
     flex: 1,
   },
   scroll: {
     flexGrow: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.xl,
-    gap: spacing.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  scrollWide: {
-    paddingVertical: spacing.xxl,
+  scrollMobile: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
   },
-  eyebrowContainer: {
-    alignItems: "center",
-  },
-  eyebrowPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xxs + 2,
-    backgroundColor: colors.canvas,
-    borderRadius: rounded.full,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-  },
-  eyebrowDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.stone,
-  },
-  eyebrowText: {
-    fontFamily: fonts.sans,
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 1.2,
-    color: colors.stone,
-    textTransform: "uppercase",
+  scrollDesktop: {
+    paddingHorizontal: 32,
+    paddingVertical: 48,
   },
   card: {
-    width: "100%",
-    maxWidth: 420,
-    backgroundColor: colors.surface,
-    borderRadius: rounded.lg,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.xl,
-    alignItems: "center",
-    gap: spacing.lg,
-    ...shadows.card,
+    width: '100%',
+    alignItems: 'center',
+    gap: 24,
   },
-  cardWide: {
+  cardMobile: {
+    // Pure native mobile app style: no outer box borders or shadows
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    maxWidth: 380,
+    paddingHorizontal: 0,
+  },
+  cardDesktop: {
     maxWidth: 440,
-    paddingHorizontal: spacing.xl + 4,
-    paddingVertical: spacing.xl + 8,
+    borderRadius: 24,
+    borderWidth: 1,
+    paddingHorizontal: 36,
+    paddingVertical: 44,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 24,
+    elevation: 3,
   },
   emblemContainer: {
-    alignItems: "center",
-    gap: spacing.xs,
+    alignItems: 'center',
+    gap: 12,
   },
   wordmark: {
-    fontFamily: fonts.serif,
-    fontSize: 15,
-    fontWeight: "300",
-    letterSpacing: 3,
-    color: colors.stone,
-    textTransform: "uppercase",
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: 2.8,
+    textTransform: 'uppercase',
   },
   textGroup: {
-    alignItems: "center",
-    gap: spacing.xs,
-    width: "100%",
+    alignItems: 'center',
+    gap: 8,
+    width: '100%',
   },
   heading: {
-    fontFamily: fonts.serif,
-    fontSize: 30,
-    fontWeight: "300",
-    color: colors.ink,
-    textAlign: "center",
-    letterSpacing: -0.2,
+    fontSize: 26,
+    fontWeight: '700',
+    textAlign: 'center',
+    letterSpacing: -0.5,
   },
   subheading: {
-    fontFamily: fonts.sans,
     fontSize: 14,
     lineHeight: 20,
-    color: colors.stone,
-    textAlign: "center",
+    textAlign: 'center',
     maxWidth: 320,
   },
   actionButton: {
-    width: "100%",
-    marginTop: spacing.xs,
+    width: '100%',
+    marginTop: 4,
   },
   policyNotice: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-    backgroundColor: colors.canvas,
-    borderRadius: rounded.full,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderRadius: 9999,
     borderWidth: 1,
-    borderColor: colors.hairline,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.md,
-    width: "100%",
-    justifyContent: "center",
+    paddingVertical: 9,
+    paddingHorizontal: 16,
+    width: '100%',
+    justifyContent: 'center',
   },
   policyIconDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: colors.olive,
   },
   policyText: {
-    fontFamily: fonts.sans,
     fontSize: 12,
-    color: colors.stone,
-    textAlign: "center",
-  },
-  footer: {
-    alignItems: "center",
-    paddingTop: spacing.xs,
-  },
-  footerText: {
-    fontFamily: fonts.sans,
-    fontSize: 12,
-    color: colors.ash,
-    letterSpacing: 0.2,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });

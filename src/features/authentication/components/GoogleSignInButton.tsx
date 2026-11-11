@@ -8,7 +8,7 @@ import {
   Image,
   type ViewStyle,
 } from 'react-native';
-import { colors, fonts, rounded, spacing } from '@/constants/theme';
+import { useTheme } from '@/theme';
 
 interface Props {
   onPress: () => void;
@@ -17,9 +17,18 @@ interface Props {
 }
 
 export function GoogleSignInButton({ onPress, isLoading = false, style }: Props) {
+  const { colors } = useTheme();
+
   return (
     <TouchableOpacity
-      style={[styles.button, isLoading && styles.buttonDisabled, style]}
+      style={[
+        styles.button,
+        {
+          backgroundColor: colors.primary,
+        },
+        isLoading && styles.buttonDisabled,
+        style,
+      ]}
       onPress={onPress}
       disabled={isLoading}
       accessibilityLabel="Continue with Google"
@@ -27,7 +36,7 @@ export function GoogleSignInButton({ onPress, isLoading = false, style }: Props)
       activeOpacity={0.88}
     >
       {isLoading ? (
-        <ActivityIndicator color={colors.onPrimary} size="small" />
+        <ActivityIndicator color={colors.primaryForeground} size="small" />
       ) : (
         <View style={styles.iconCircle}>
           <Image
@@ -38,7 +47,7 @@ export function GoogleSignInButton({ onPress, isLoading = false, style }: Props)
           />
         </View>
       )}
-      <Text style={styles.label}>
+      <Text style={[styles.label, { color: colors.primaryForeground }]}>
         {isLoading ? 'Authenticating…' : 'Continue with Google'}
       </Text>
     </TouchableOpacity>
@@ -50,11 +59,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primary,
-    borderRadius: rounded.full,
+    borderRadius: 9999,
     paddingVertical: 14,
-    paddingHorizontal: spacing.lg,
-    gap: spacing.sm,
+    paddingHorizontal: 20,
+    gap: 12,
     width: '100%',
     minHeight: 48,
   },
@@ -74,10 +82,8 @@ const styles = StyleSheet.create({
     height: 15,
   },
   label: {
-    fontFamily: fonts.sans,
     fontSize: 15,
     fontWeight: '600',
-    color: colors.onPrimary,
-    letterSpacing: 0.2,
+    letterSpacing: -0.1,
   },
 });

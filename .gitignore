@@ -50,3 +50,5 @@ expo-env.d.ts
 
 plan/
 DESIGN.md
+.agents/
+skills-lock.json

@@ -1,56 +1,56 @@
 import { Platform } from 'react-native';
 
 export const colors = {
-  // Brand & Action
-  primary: '#2a72de',       // Action blue — strictly reserved for primary CTA
+  // Brand & Action (Obsidian / High-Contrast Modern Tech)
+  primary: '#0f172a',       // Deep obsidian — clean, modern, high-contrast primary CTA
   onPrimary: '#ffffff',
-  stone: '#4a4741',         // Warm taupe-brown neutral — wordmarks, secondary pills, outlines
+  stone: '#1e293b',         // Sleek slate neutral — wordmarks, secondary pills, outlines
   onStone: '#ffffff',
   
-  // Surfaces
-  canvas: '#f7f1e8',        // Signature warm-paper resting background
+  // Surfaces (Clean, crisp modern canvas inspired by hbplus.fit)
+  canvas: '#f8f9fa',        // Signature clean, modern off-white canvas
   surface: '#ffffff',       // Pure white elevated cards & containers
-  surfaceGrey: '#ececec',   // Light utility fill
-  silver: '#cccac7',        // Subtle border & tab edge
-  hairline: '#e1dcd3',      // Warm 1px divider / border on canvas
+  surfaceGrey: '#f1f5f9',   // Light utility fill / subtle track
+  silver: '#e2e8f0',        // Subtle border & tab edge
+  hairline: '#e5e7eb',      // Crisp, refined 1px border on canvas & cards
   
   // Ink & Text
-  ink: '#1c1b1a',           // Primary heading and body text on cream
-  ash: '#838280',           // Muted grey for metadata & utility captions
-  mute: '#a8a5a0',          // Quietest captions & disabled text
+  ink: '#0f172a',           // Deep slate black heading and body text
+  ash: '#64748b',           // Muted slate for metadata & utility captions
+  mute: '#94a3b8',          // Quietest captions & disabled text
   onDark: '#ffffff',
   
-  // Earth-tone Accent Families (Bands, Data-viz & Badges)
-  gold: '#af751b',
-  ochre: '#bc924c',
-  goldSoft: '#ddaa61',
-  goldPale: '#ddbe78',
-  goldBg: '#faf4e8',
+  // Wellness & Vitality Accent Families (Inspired by hbplus.fit health & fitness ecosystem)
+  gold: '#d97706',          // Warm amber for administrative badges
+  ochre: '#b45309',
+  goldSoft: '#f59e0b',
+  goldPale: '#fde68a',
+  goldBg: '#fffbeb',        // Subtle warm amber badge background
   
-  forest: '#224228',
-  olive: '#5c6f5d',
-  sage: '#849671',
-  sagePale: '#ced4b8',
-  sageBg: '#f2f5ee',
+  forest: '#065f46',        // Deep emerald forest
+  olive: '#047857',
+  sage: '#10b981',          // Vibrant, clean emerald vitality green (verified status & member badges)
+  sagePale: '#a7f3d0',
+  sageBg: '#ecfdf5',        // Soft emerald badge background
   
   clay: '#6b443d',
-  espresso: '#39221e',
+  espresso: '#1e293b',
   
   // Semantic
-  error: '#e33a22',
-  errorBg: '#fdf1ef',
-  errorBorder: '#f8c8c1',
+  error: '#ef4444',         // Crisp modern red
+  errorBg: '#fef2f2',
+  errorBorder: '#fecaca',
 } as const;
 
 export const fonts = {
   serif: Platform.select({
-    web: "Georgia, 'Editorial New', 'Newsreader', 'Times New Roman', serif",
-    ios: 'Georgia',
-    android: 'serif',
-    default: 'serif',
+    web: "-apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Inter', 'Segoe UI', Roboto, sans-serif",
+    ios: 'System',
+    android: 'sans-serif-medium',
+    default: 'sans-serif',
   }),
   sans: Platform.select({
-    web: "-apple-system, BlinkMacSystemFont, 'Inter', 'AkkuratLL', 'Segoe UI', Roboto, sans-serif",
+    web: "-apple-system, BlinkMacSystemFont, 'Inter', 'Plus Jakarta Sans', 'Segoe UI', Roboto, sans-serif",
     ios: 'System',
     android: 'sans-serif',
     default: 'sans-serif',
@@ -62,8 +62,8 @@ export const rounded = {
   xs: 4,
   sm: 8,
   md: 12,
-  lg: 24,
-  xl: 40,
+  lg: 18,
+  xl: 28,
   full: 9999,
 } as const;
 
@@ -79,15 +79,15 @@ export const spacing = {
 
 export const shadows = {
   card: {
-    shadowColor: '#39221e',
-    shadowOpacity: 0.05,
+    shadowColor: '#0f172a',
+    shadowOpacity: 0.04,
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 4 },
     elevation: 2,
   },
   elevated: {
-    shadowColor: '#39221e',
-    shadowOpacity: 0.09,
+    shadowColor: '#0f172a',
+    shadowOpacity: 0.07,
     shadowRadius: 24,
     shadowOffset: { width: 0, height: 8 },
     elevation: 4,
