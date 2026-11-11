@@ -7,9 +7,15 @@ function initFirebase(): admin.app.App {
   let credential: admin.credential.Credential;
 
   if (env.FIREBASE_SERVICE_ACCOUNT_JSON) {
-    // Base64-encoded service account JSON (ideal for containers / cloud deployments)
-    const json = Buffer.from(env.FIREBASE_SERVICE_ACCOUNT_JSON, 'base64').toString('utf-8');
-    const serviceAccount = JSON.parse(json) as admin.ServiceAccount;
+    // Supports either raw JSON string or base64-encoded JSON string
+    const raw = env.FIREBASE_SERVICE_ACCOUNT_JSON.trim();
+    let serviceAccount: admin.ServiceAccount;
+    if (raw.startsWith('{')) {
+      serviceAccount = JSON.parse(raw) as admin.ServiceAccount;
+    } else {
+      const json = Buffer.from(raw, 'base64').toString('utf-8');
+      serviceAccount = JSON.parse(json) as admin.ServiceAccount;
+    }
     credential = admin.credential.cert(serviceAccount);
   } else {
     // GOOGLE_APPLICATION_CREDENTIALS env var points to the JSON file

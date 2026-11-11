@@ -13,25 +13,25 @@
     "admin:list": "ts-node scripts/list-admins.ts"
   },
   "dependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "firebase-admin": "^13.0.0",
     "google-auth-library": "^9.15.1",
     "iron-session": "^8.0.3",
+    "typescript": "^5.3.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
     "@types/jest": "^29.5.0",
-    "@types/node": "^22.0.0",
     "@types/supertest": "^6.0.2",
     "jest": "^29.7.0",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.0",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^5.3.3"
+    "ts-node-dev": "^2.0.0"
   },
   "jest": {
     "preset": "ts-jest",

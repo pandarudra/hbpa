@@ -28,7 +28,7 @@ app.get('/api/dashboard', authenticate, async (req, res, next) => {
 });
 
 // Health check
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.get(['/health', '/api/health'], (_req, res) => res.json({ status: 'ok' }));
 
 // ── Error handler (must be last) ──────────────────────────────────────────────
 app.use(errorHandler);
