@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,18 +8,21 @@ import {
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
-} from 'react-native';
-import config from '@/constants/config';
-import { useAuth } from '@/providers/AuthProvider';
-import toast from 'react-hot-toast';
-import { GoogleSignInButton } from '@/features/authentication/components/GoogleSignInButton';
-import { AuthErrorMessage } from '@/features/authentication/components/AuthErrorMessage';
-import { LoginSuccessAnimation } from '@/features/authentication/components/LoginSuccessAnimation';
-import { HorizonIcon } from '@/components/common/HorizonIcon';
-import { ThemeToggle } from '@/components/common/ThemeToggle';
-import { authApi } from '@/features/authentication/services/authApi';
-import type { AppUser } from '@/features/authentication/types/auth.types';
-import { useTheme, typography } from '@/theme';
+  Pressable,
+} from "react-native";
+import config from "@/constants/config";
+import { useAuth } from "@/providers/AuthProvider";
+import toast from "react-hot-toast";
+import { Info } from "lucide-react-native";
+import { GoogleSignInButton } from "@/features/authentication/components/GoogleSignInButton";
+import { AuthErrorMessage } from "@/features/authentication/components/AuthErrorMessage";
+import { LoginSuccessAnimation } from "@/features/authentication/components/LoginSuccessAnimation";
+import { AuthInfoModal } from "@/features/authentication/components/AuthInfoModal";
+import { HorizonIcon } from "@/components/common/HorizonIcon";
+import { ThemeToggle } from "@/components/common/ThemeToggle";
+import { authApi } from "@/features/authentication/services/authApi";
+import type { AppUser } from "@/features/authentication/types/auth.types";
+import { useTheme, typography } from "@/theme";
 
 export default function LoginScreen() {
   const { signIn, isLoading, error, clearError } = useAuth();
@@ -27,11 +30,12 @@ export default function LoginScreen() {
   const { colors, isDark } = useTheme();
   const isDesktop = width >= 768;
   const [verifiedUser, setVerifiedUser] = useState<AppUser | null>(null);
+  const [infoVisible, setInfoVisible] = useState(false);
 
   const [allowedDomains, setAllowedDomains] = useState<string[]>(
     config.allowedDomains.length > 0
       ? config.allowedDomains
-      : ['hbplus.fit', 'outr.ac.in'],
+      : ["hbplus.fit", "outr.ac.in"],
   );
 
   useEffect(() => {
@@ -49,8 +53,8 @@ export default function LoginScreen() {
 
   const allowedDomainsList =
     allowedDomains.length > 0
-      ? allowedDomains.map((d) => `@${d}`).join(', ')
-      : '@hbplus.fit, @outr.ac.in';
+      ? allowedDomains.map((d) => `@${d}`).join(", ")
+      : "@hbplus.fit, @outr.ac.in";
 
   // Trigger matching toast on error via react-hot-toast
   useEffect(() => {
@@ -62,8 +66,8 @@ export default function LoginScreen() {
   const handleSignIn = async () => {
     await signIn(async (user: AppUser) => {
       setVerifiedUser(user);
-      const userDomain = user.email ? user.email.split('@')[1] : '';
-      toast.success(`Welcome, ${user.name.split(' ')[0]} (@${userDomain})`);
+      const userDomain = user.email ? user.email.split("@")[1] : "";
+      toast.success(`Welcome, ${user.name.split(" ")[0]} (@${userDomain})`);
       // Wait for the animated tick to finish playing
       await new Promise((resolve) => setTimeout(resolve, 1400));
     });
@@ -79,7 +83,7 @@ export default function LoginScreen() {
 
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView
           contentContainerStyle={[
@@ -98,7 +102,7 @@ export default function LoginScreen() {
                     {
                       backgroundColor: colors.surface,
                       borderColor: colors.border,
-                      shadowColor: isDark ? '#000000' : '#0F172A',
+                      shadowColor: isDark ? "#000000" : "#0F172A",
                     },
                   ]
                 : styles.cardMobile,
@@ -114,14 +118,23 @@ export default function LoginScreen() {
                 {/* Minimalist Emblem */}
                 <View style={styles.emblemContainer}>
                   <HorizonIcon size={52} variant="filled" />
-                  <Text style={[styles.wordmark, { color: colors.textPrimary }]}>HORIZON</Text>
+                  <Text
+                    style={[styles.wordmark, { color: colors.textPrimary }]}
+                  >
+                    HORIZON
+                  </Text>
                 </View>
 
                 {/* Typography Header */}
                 <View style={styles.textGroup}>
-                  <Text style={[styles.heading, { color: colors.textPrimary }]}>Welcome back</Text>
-                  <Text style={[styles.subheading, { color: colors.textSecondary }]}>
-                    Sign in using your official organization Google account to continue.
+                  <Text style={[styles.heading, { color: colors.textPrimary }]}>
+                    Welcome back
+                  </Text>
+                  <Text
+                    style={[styles.subheading, { color: colors.textSecondary }]}
+                  >
+                    Sign in using your official organization Google account to
+                    continue.
                   </Text>
                 </View>
 
@@ -151,16 +164,46 @@ export default function LoginScreen() {
                     },
                   ]}
                 >
-                  <View style={[styles.policyIconDot, { backgroundColor: colors.success }]} />
                   <Text style={[styles.policyText, { color: colors.success }]}>
                     Access is exclusively to {allowedDomainsList}
                   </Text>
                 </View>
+
+                {/* Info Link: setup, auth flow & domain restriction explainer */}
+                <Pressable
+                  onPress={() => setInfoVisible(true)}
+                  style={({ pressed }) => [
+                    styles.infoLink,
+                    { opacity: pressed ? 0.6 : 1 },
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel="How sign-in and domain restriction work"
+                >
+                  <Info
+                    size={13}
+                    color={colors.textSecondary}
+                    strokeWidth={2}
+                  />
+                  <Text
+                    style={[
+                      styles.infoLinkText,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
+                    How does sign-in work?
+                  </Text>
+                </Pressable>
               </>
             )}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <AuthInfoModal
+        visible={infoVisible}
+        onClose={() => setInfoVisible(false)}
+        allowedDomains={allowedDomains}
+      />
     </SafeAreaView>
   );
 }
@@ -170,11 +213,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   topBar: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'web' ? 14 : 6,
+    paddingTop: Platform.OS === "web" ? 14 : 6,
     paddingBottom: 4,
     zIndex: 10,
   },
@@ -186,8 +229,8 @@ const styles = StyleSheet.create({
   },
   scroll: {
     flexGrow: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   scrollMobile: {
     paddingHorizontal: 24,
@@ -198,13 +241,13 @@ const styles = StyleSheet.create({
     paddingVertical: 48,
   },
   card: {
-    width: '100%',
-    alignItems: 'center',
+    width: "100%",
+    alignItems: "center",
     gap: 24,
   },
   cardMobile: {
     // Pure native mobile app style: no outer box borders or shadows
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderWidth: 0,
     maxWidth: 380,
     paddingHorizontal: 0,
@@ -221,48 +264,48 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   emblemContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: 12,
   },
   wordmark: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: "700",
     letterSpacing: 2.8,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   textGroup: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: 8,
-    width: '100%',
+    width: "100%",
   },
   heading: {
     fontFamily: typography.fonts.heading,
     fontSize: 32,
-    fontWeight: '400',
-    textAlign: 'center',
+    fontWeight: "400",
+    textAlign: "center",
     letterSpacing: -0.5,
   },
   subheading: {
     fontFamily: typography.fonts.body,
     fontSize: 14,
     lineHeight: 20,
-    textAlign: 'center',
+    textAlign: "center",
     maxWidth: 320,
   },
   actionButton: {
-    width: '100%',
+    width: "100%",
     marginTop: 4,
   },
   policyNotice: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     borderRadius: 9999,
     borderWidth: 1,
     paddingVertical: 9,
     paddingHorizontal: 16,
-    width: '100%',
-    justifyContent: 'center',
+    width: "100%",
+    justifyContent: "center",
   },
   policyIconDot: {
     width: 6,
@@ -272,7 +315,18 @@ const styles = StyleSheet.create({
   policyText: {
     fontFamily: typography.fonts.bodySemibold,
     fontSize: 12,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  infoLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 2,
+  },
+  infoLinkText: {
+    fontFamily: typography.fonts.body,
+    fontSize: 13,
+    textDecorationLine: "underline",
   },
 });
