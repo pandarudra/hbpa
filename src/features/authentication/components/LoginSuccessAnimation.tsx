@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
+import { CheckIcon } from '@/components/common/Icons';
 import { colors, fonts, rounded, spacing } from '@/constants/theme';
 
 interface Props {
@@ -115,7 +116,7 @@ export function LoginSuccessAnimation({ name, email, onComplete }: Props) {
               },
             ]}
           >
-            <Text style={styles.tickGlyph}>✓</Text>
+            <CheckIcon size={26} color={colors.onStone} strokeWidth={2.8} />
           </Animated.View>
         </Animated.View>
       </View>

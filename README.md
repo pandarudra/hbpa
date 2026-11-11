@@ -1,4 +1,8 @@
-# Horizon Portal — Cross-Platform Domain-Restricted Authentication Platform
+<div align="center">
+  <img src="./assets/images/horizon-icon.svg" width="80" height="80" alt="Horizon Emblem" />
+</div>
+
+# Horizon — Cross-Platform Domain-Restricted Authentication Platform
 
 > Enterprise-grade authentication portal and protected dashboard built with **React Native (Expo)**, **React Native for Web**, and a secure **Node.js/Express** backend. Access is strictly restricted to verified Google Workspace email addresses from authorised domains (e.g. `@hbplus.fit`).
 
@@ -6,7 +10,7 @@
 
 ## Table of Contents
 
-- [Horizon Portal — Cross-Platform Domain-Restricted Authentication Platform](#horizon-portal--cross-platform-domain-restricted-authentication-platform)
+- [Horizon — Cross-Platform Domain-Restricted Authentication Platform](#horizon--cross-platform-domain-restricted-authentication-platform)
   - [Table of Contents](#table-of-contents)
   - [Overview](#overview)
     - [Problem Solved](#problem-solved)
@@ -51,7 +55,12 @@
       - [Multiple Domains](#multiple-domains)
   - [Role-Based Access Control (RBAC) \& Database Schema](#role-based-access-control-rbac--database-schema)
     - [Database Schema (`users` collection in Firestore)](#database-schema-users-collection-in-firestore)
-    - [RBAC Guards](#rbac-guards)
+    - [RBAC Guards \& Zero-UI Admin Policy](#rbac-guards--zero-ui-admin-policy)
+  - [Administrative Provisioning (Terminal Only)](#administrative-provisioning-terminal-only)
+    - [Operational Guardrails](#operational-guardrails)
+  - [Separate User and Admin Dashboards](#separate-user-and-admin-dashboards)
+    - [1. Minimal Regular User Dashboard (`/dashboard`)](#1-minimal-regular-user-dashboard-dashboard)
+    - [2. Admin User Management Dashboard (`/admin`)](#2-admin-user-management-dashboard-admin)
   - [API Reference](#api-reference)
     - [Authentication Endpoints](#authentication-endpoints)
       - [1. Google Login](#1-google-login)
@@ -60,7 +69,6 @@
     - [Dashboard \& Admin Endpoints](#dashboard--admin-endpoints)
       - [4. Get Dashboard Data](#4-get-dashboard-data)
       - [5. List Users (Admin)](#5-list-users-admin)
-      - [6. Update User Role (Admin)](#6-update-user-role-admin)
   - [Testing \& Verification](#testing--verification)
     - [Running Automated Backend Tests](#running-automated-backend-tests)
     - [Manual Verification Matrix](#manual-verification-matrix)
@@ -684,14 +692,65 @@ interface AppUser {
 }
 ```
 
-### RBAC Guards
+### RBAC Guards & Zero-UI Admin Policy
 
 1. **Default Role**: Newly provisioned accounts receive `role: "USER"` and `status: "ACTIVE"`.
 2. **Immutability on Login**: Subsequent logins merge profile updates (`avatarUrl`, `name`, `lastLoginAt`) but strictly preserve existing `role` and `status` values.
 3. **Route & Endpoint Protection**:
    - Standard user routes (`/api/dashboard`, `/api/auth/me`) require `authenticate`.
    - Administrative endpoints (`/api/admin/*`) require `authenticate` followed by `requireRole('ADMIN')`.
-   - Administrators cannot accidentally demote themselves (guarded by `req.user.uid === id` check in `updateRole`).
+4. **Terminal-Only Administration**:
+   - There is NO public admin registration or frontend UI to promote accounts.
+   - There are NO REST API endpoints that permit role modification (`PATCH /users/:id/role` has been permanently eliminated).
+   - Administrative roles must ONLY be assigned or revoked via terminal CLI scripts by server operators.
+
+---
+
+## Administrative Provisioning (Terminal Only)
+
+Horizon provides zero-trust CLI scripts for administrative user management:
+
+```bash
+# 1. Promote an authorized organization user to ADMIN
+npm run admin:create -- --email admin@hbplus.fit
+
+# 2. Revoke administrative privileges
+npm run admin:remove -- --email admin@hbplus.fit
+
+# 3. List all registered administrators
+npm run admin:list
+```
+
+### Operational Guardrails
+
+- **Domain Allowlist Check**: The target email must match an authorized organization domain in `ALLOWED_EMAIL_DOMAINS`.
+- **Existing User Check**: The user must have authenticated with their Google organization account at least once before receiving admin privileges.
+- **Idempotence**: Running `admin:create` on an existing admin is a no-op.
+- **Last Active Admin Lockout Protection**: `admin:remove` automatically verifies the total number of active administrators. If the target is the only remaining active admin, demotion is strictly aborted to prevent lockout.
+
+---
+
+## Separate User and Admin Dashboards
+
+### 1. Minimal Regular User Dashboard (`/dashboard`)
+
+Designed with an ultra-minimalist, no-scroll philosophy:
+
+- **Clean Header**: Horizon emblem, brand wordmark, user avatar, and exactly one **Sign Out** button.
+- **Centered Greeting**: Eyebrow `WELCOME TO HORIZON`, dynamic headline `Welcome back, [First Name].`, and confirmation `Your official organization account is successfully authenticated.`
+- **No Telemetry**: Completely eliminates session/account telemetry, domain verification cards, provider timestamps, and bottom sign-out buttons.
+- **100dvh No-Scroll**: Strictly fits within the viewport across mobile and desktop.
+- **Role Guard**: If an administrator accesses `/dashboard`, they are automatically redirected to `/admin`.
+
+### 2. Admin User Management Dashboard (`/admin`)
+
+Dedicated directory interface for organization administrators:
+
+- **Header**: Horizon branding, gold `ADMIN` pill, administrator name & avatar, and **Sign Out** button.
+- **User Directory Table**: Displays registered members with Avatar, Name, Email, Role badge, Status badge, Joined Date, and Last Login.
+- **Server-Side Pagination**: Supports page sizes of `10`, `25`, and `50` records with pagination controls (`Showing 1-10 of 125 users`, Previous/Next).
+- **Search & Filters**: Debounced instant search across name and email; filter by Role (`USER`, `ADMIN`) and Status (`ACTIVE`, `DISABLED`).
+- **Role Guard**: If a non-admin (`USER`) accesses `/admin`, they are immediately redirected to `/dashboard`.
 
 ---
 
@@ -747,20 +806,46 @@ Base URL (Local Development): `http://localhost:4000`
 #### 5. List Users (Admin)
 
 - **Method**: `GET`
-- **Route**: `/api/admin/users?page=1&limit=20&role=USER&status=ACTIVE`
-- **Access**: `ADMIN` only
+- **Route**: `/api/admin/users?page=1&limit=10&search=debansh&role=USER&status=ACTIVE`
+- **Access**: `ADMIN` role only
+- **Query Parameters**:
+  - `page` (optional, default `1`): Page number (min: 1)
+  - `limit` (optional, default `10`): Items per page (min: 1, max: 100)
+  - `search` (optional): Case-insensitive search on name or email
+  - `role` (optional): `USER` or `ADMIN`
+  - `status` (optional): `ACTIVE` or `DISABLED`
 - **Responses**:
-  - `200 OK`: `{ "success": true, "users": [ ... ], "pagination": { "page": 1, "limit": 20, "total": 1 } }`.
-  - `403 Forbidden`: `{ "success": false, "code": "FORBIDDEN" }`.
-
-#### 6. Update User Role (Admin)
-
-- **Method**: `PATCH`
-- **Route**: `/api/admin/users/:id/role`
-- **Access**: `ADMIN` only
-- **Body**: `{ "role": "ADMIN" }`
-- **Responses**:
-  - `200 OK`: `{ "success": true, "user": { "uid": "...", "role": "ADMIN" } }`.
+  - `200 OK`:
+    ```json
+    {
+      "success": true,
+      "data": {
+        "users": [
+          {
+            "id": "uid_123",
+            "name": "Debansh Mohanty",
+            "email": "debansh@hbplus.fit",
+            "avatarUrl": "https://...",
+            "role": "ADMIN",
+            "status": "ACTIVE",
+            "createdAt": "2026-01-10T12:00:00.000Z",
+            "lastLoginAt": "2026-01-15T08:30:00.000Z"
+          }
+        ],
+        "pagination": {
+          "currentPage": 1,
+          "pageSize": 10,
+          "totalUsers": 125,
+          "totalPages": 13,
+          "hasNextPage": true,
+          "hasPreviousPage": false
+        }
+      }
+    }
+    ```
+  - `400 Bad Request`: `{ "success": false, "code": "INVALID_QUERY_PARAMS", "message": "..." }`
+  - `401 Unauthorized`: `{ "success": false, "code": "UNAUTHENTICATED" }`
+  - `403 Forbidden`: `{ "success": false, "code": "FORBIDDEN" }`
 
 ---
 

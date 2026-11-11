@@ -82,9 +82,12 @@ async function upsertUser(
   const now = FieldValue.serverTimestamp();
 
   const updateData = {
+    id: decoded.uid,
     uid: decoded.uid,
     provider: "google",
+    providerUserId: decoded.uid,
     email: decoded.email!.toLowerCase().trim(),
+    normalizedEmail: decoded.email!.toLowerCase().trim(),
     emailVerified: true,
     name: decoded.name ?? "",
     avatarUrl: decoded.picture ?? "",

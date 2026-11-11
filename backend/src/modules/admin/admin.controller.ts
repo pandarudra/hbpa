@@ -1,47 +1,121 @@
 import type { Request, Response, NextFunction } from 'express';
 import { firestore } from '../../config/firebase';
-import { Errors } from '../../utils/errors';
-import { FieldValue } from 'firebase-admin/firestore';
 import { z } from 'zod';
 
-const roleSchema = z.enum(['USER', 'ADMIN']);
+const querySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+  search: z.string().trim().optional(),
+  role: z.enum(['USER', 'ADMIN']).optional(),
+  status: z.enum(['ACTIVE', 'DISABLED']).optional(),
+});
 
-/** GET /api/admin/users */
-export async function listUsers(req: Request, res: Response, next: NextFunction) {
-  try {
-    const page = Number(req.query.page ?? 1);
-    const limit = Math.min(Number(req.query.limit ?? 20), 100);
-
-    let query = firestore.collection('users').orderBy('createdAt', 'desc');
-    if (req.query.role) query = query.where('role', '==', req.query.role);
-    if (req.query.status) query = query.where('status', '==', req.query.status);
-
-    const snap = await query.limit(limit).offset((page - 1) * limit).get();
-    const users = snap.docs.map((d) => d.data());
-
-    res.json({ success: true, users, pagination: { page, limit, total: snap.size } });
-  } catch (err) {
-    next(err);
+function formatTimestamp(value: unknown): string | null {
+  if (!value) return null;
+  if (typeof value === 'object' && value !== null && 'toDate' in value) {
+    return (value as { toDate: () => Date }).toDate().toISOString();
   }
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+  if (typeof value === 'string') {
+    return value;
+  }
+  return null;
 }
 
-/** PATCH /api/admin/users/:id/role */
-export async function updateRole(req: Request, res: Response, next: NextFunction) {
+interface RawUserDoc {
+  id?: string;
+  uid?: string;
+  name?: string;
+  email?: string;
+  avatarUrl?: string | null;
+  role?: 'USER' | 'ADMIN';
+  status?: 'ACTIVE' | 'DISABLED';
+  createdAt?: unknown;
+  lastLoginAt?: unknown;
+}
+
+/**
+ * GET /api/admin/users
+ * Protected administrative user directory with server-side pagination, search & filters.
+ */
+export async function listUsers(req: Request, res: Response, next: NextFunction) {
   try {
-    const { id } = req.params;
+    const parseResult = querySchema.safeParse(req.query);
+    if (!parseResult.success) {
+      res.status(400).json({
+        success: false,
+        code: 'INVALID_QUERY_PARAMS',
+        message: 'Invalid pagination or filter parameters.',
+        details: parseResult.error.flatten().fieldErrors,
+      });
+      return;
+    }
 
-    // Prevent self-modification
-    if (req.user!.uid === id) throw Errors.selfRoleChange();
+    const { page, limit, search, role, status } = parseResult.data;
 
-    const parsed = roleSchema.safeParse((req.body as { role?: string }).role);
-    if (!parsed.success) throw Errors.invalidRole();
+    let baseQuery: FirebaseFirestore.Query = firestore.collection('users');
 
-    const ref = firestore.collection('users').doc(id);
-    const snap = await ref.get();
-    if (!snap.exists) throw Errors.userNotFound();
+    if (role) {
+      baseQuery = baseQuery.where('role', '==', role);
+    }
+    if (status) {
+      baseQuery = baseQuery.where('status', '==', status);
+    }
 
-    await ref.update({ role: parsed.data, updatedAt: FieldValue.serverTimestamp() });
-    res.json({ success: true, user: { uid: id, role: parsed.data } });
+    // Fetch matching documents.
+    // By sorting in memory, we ensure queries never fail due to missing Firestore composite
+    // indexes when combining where('role') / where('status') with orderBy('createdAt').
+    const snap = await baseQuery.get();
+
+    let allUsers = snap.docs.map((d) => {
+      const data = d.data() as RawUserDoc;
+      return {
+        id: d.id,
+        name: data.name ?? '',
+        email: data.email ?? '',
+        avatarUrl: data.avatarUrl ?? null,
+        role: data.role ?? 'USER',
+        status: data.status ?? 'ACTIVE',
+        createdAt: formatTimestamp(data.createdAt),
+        lastLoginAt: formatTimestamp(data.lastLoginAt),
+      };
+    });
+
+    if (search && search.length > 0) {
+      const term = search.toLowerCase();
+      allUsers = allUsers.filter(
+        (u) => u.name.toLowerCase().includes(term) || u.email.toLowerCase().includes(term),
+      );
+    }
+
+    // Sort by createdAt descending (newest first)
+    allUsers.sort((a, b) => {
+      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return timeB - timeA;
+    });
+
+    const totalUsers = allUsers.length;
+    const startIndex = (page - 1) * limit;
+    const users = allUsers.slice(startIndex, startIndex + limit);
+    const totalPages = Math.ceil(totalUsers / limit) || 1;
+
+    res.json({
+      success: true,
+      data: {
+        users,
+        pagination: {
+          currentPage: page,
+          pageSize: limit,
+          totalUsers,
+          totalPages,
+          hasNextPage: page < totalPages,
+          hasPreviousPage: page > 1,
+        },
+      },
+    });
   } catch (err) {
     next(err);
   }

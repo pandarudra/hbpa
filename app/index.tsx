@@ -11,6 +11,8 @@ export default function Index() {
   const { user, isLoading } = useAuth();
 
   if (isLoading) return <LoadingScreen />;
-  if (user) return <Redirect href="/(protected)/dashboard" />;
+  if (user) {
+    return <Redirect href={user.role === 'ADMIN' ? '/admin' : '/dashboard'} />;
+  }
   return <Redirect href="/(auth)/login" />;
 }

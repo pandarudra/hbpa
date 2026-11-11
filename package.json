@@ -10,7 +10,10 @@
     "lint": "eslint . --ext .ts,.tsx --max-warnings 0",
     "type-check": "tsc --noEmit",
     "test": "jest --passWithNoTests",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "admin:create": "npm --prefix backend run admin:create --",
+    "admin:remove": "npm --prefix backend run admin:remove --",
+    "admin:list": "npm --prefix backend run admin:list"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
@@ -50,7 +53,13 @@
   },
   "jest": {
     "preset": "jest-expo",
-    "testPathPattern": "tests/unit",
+    "testMatch": [
+      "<rootDir>/tests/**/*.test.ts?(x)"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/backend/"
+    ],
     "transformIgnorePatterns": [
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg)"
     ]

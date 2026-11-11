@@ -15,7 +15,7 @@ const config = {
   apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:4000',
 
   allowedDomains: process.env.EXPO_PUBLIC_ALLOWED_DOMAINS
-    ? process.env.EXPO_PUBLIC_ALLOWED_DOMAINS.split(',').map((d) => d.trim().toLowerCase()).filter(Boolean)
+    ? process.env.EXPO_PUBLIC_ALLOWED_DOMAINS.split(',').map((d: string) => d.trim().toLowerCase()).filter(Boolean)
     : [],
 } as const;
 

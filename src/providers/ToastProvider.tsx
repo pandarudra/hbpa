@@ -12,6 +12,7 @@ import toast, {
   useToaster,
   type Toast,
 } from 'react-hot-toast';
+import { CheckIcon, CloseIcon, AlertCircleIcon } from '@/components/common/Icons';
 import { colors, fonts, rounded, spacing, shadows } from '@/constants/theme';
 
 export { toast };
@@ -87,8 +88,8 @@ function NativeToastItem({ toast: t }: { toast: Toast }) {
           isError && styles.iconBadgeError,
         ]}
       >
-        {isSuccess && <Text style={styles.tickIcon}>✓</Text>}
-        {isError && <Text style={styles.errorIcon}>!</Text>}
+        {isSuccess && <CheckIcon size={12} color={colors.sage} />}
+        {isError && <AlertCircleIcon size={14} color={colors.error} />}
         {!isSuccess && !isError && <View style={styles.infoDot} />}
       </View>
       <Text style={styles.nativeText}>{messageStr}</Text>
@@ -97,7 +98,7 @@ function NativeToastItem({ toast: t }: { toast: Toast }) {
         hitSlop={8}
         style={styles.dismissBtn}
       >
-        <Text style={styles.dismissText}>✕</Text>
+        <CloseIcon size={11} color={colors.ash} />
       </Pressable>
     </View>
   );

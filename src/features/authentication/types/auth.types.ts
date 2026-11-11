@@ -43,3 +43,39 @@ export interface ApiErrorResponse {
   code: string;
   message: string;
 }
+
+export interface AdminUserItem {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl: string | null;
+  role: UserRole;
+  status: UserStatus;
+  createdAt: string | null;
+  lastLoginAt: string | null;
+}
+
+export interface AdminPagination {
+  currentPage: number;
+  pageSize: number;
+  totalUsers: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+export interface AdminUsersQuery {
+  page?: number;
+  limit?: number;
+  search?: string;
+  role?: UserRole;
+  status?: UserStatus;
+}
+
+export interface AdminUsersResponse {
+  success: true;
+  data: {
+    users: AdminUserItem[];
+    pagination: AdminPagination;
+  };
+}

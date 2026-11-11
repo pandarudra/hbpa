@@ -124,15 +124,37 @@ Subdomains (e.g. `sub.hbplus.fit`) and suffix injections (e.g. `hbplus.fit.attac
 | `POST` | `/api/auth/logout` | Public | Destroys current session cookie |
 | `GET` | `/api/auth/me` | Session | Returns profile of currently logged-in user |
 | `GET` | `/api/dashboard` | Session | Returns dashboard data for authenticated user |
-| `GET` | `/api/admin/users` | Admin | Lists paginated users (supports `?role=` & `?status=`) |
-| `PATCH` | `/api/admin/users/:id/role` | Admin | Updates user role (`USER` or `ADMIN`) |
+| `GET` | `/api/admin/users` | Admin (`ADMIN` role) | Lists server-paginated users (`page`, `limit`, `search`, `role`, `status`) |
 | `GET` | `/health` | Public | Service health probe |
+
+---
+
+## Administrative Provisioning (Terminal Only)
+
+Horizon enforces a strict **Zero-UI Admin Policy**. To eliminate privilege escalation risks, administrators can **only** be provisioned, demoted, or listed via terminal commands by authorized server operators. There are no UI controls or REST endpoints to mutate roles.
+
+```bash
+# 1. Promote an authorized organization user to ADMIN
+npm run admin:create -- --email admin@hbplus.fit
+
+# 2. Revoke administrative privileges (with last-admin lockout prevention)
+npm run admin:remove -- --email admin@hbplus.fit
+
+# 3. View all registered administrators
+npm run admin:list
+```
+
+### Safety & Guardrails
+- **Domain Verification**: Validates the email belongs to an allowed organization domain.
+- **Account Verification**: Requires that the user exists and has authenticated via the organization identity provider.
+- **Lockout Prevention**: Prevents demoting the last remaining active administrator.
+- **Audit Logging**: Emits clean audit output with user UID and timestamps.
 
 ---
 
 ## Testing
 
-Run unit tests for domain restriction and edge cases:
+Run the full automated test suite (domain validation, admin API authorization & pagination, and terminal provisioning scripts):
 
 ```bash
 npm test

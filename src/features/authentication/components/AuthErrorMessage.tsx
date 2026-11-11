@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import type { AuthErrorCode } from "../types/auth.types";
+import { CloseIcon, AlertCircleIcon } from "@/components/common/Icons";
 import { colors, fonts, rounded, spacing } from "@/constants/theme";
 
 const ERROR_MESSAGES: Record<AuthErrorCode, string> = {
@@ -32,6 +33,7 @@ export function AuthErrorMessage({ code, message, onDismiss }: Props) {
       accessibilityLiveRegion="assertive"
       accessibilityRole="alert"
     >
+      <AlertCircleIcon size={16} color={colors.error} />
       <View style={styles.content}>
         <Text style={styles.text}>{text}</Text>
       </View>
@@ -41,7 +43,7 @@ export function AuthErrorMessage({ code, message, onDismiss }: Props) {
         style={styles.dismiss}
         hitSlop={8}
       >
-        <Text style={styles.dismissText}>✕</Text>
+        <CloseIcon size={11} color={colors.error} />
       </Pressable>
     </View>
   );

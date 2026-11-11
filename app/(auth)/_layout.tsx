@@ -7,7 +7,9 @@ export default function AuthLayout() {
   const { user, isLoading } = useAuth();
 
   if (isLoading) return <LoadingScreen />;
-  if (user) return <Redirect href="/(protected)/dashboard" />;
+  if (user) {
+    return <Redirect href={user.role === 'ADMIN' ? '/admin' : '/dashboard'} />;
+  }
 
   return <Stack screenOptions={{ headerShown: false }} />;
 }
