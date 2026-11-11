@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import type { AuthErrorCode } from '../types/auth.types';
+import { colors, fonts, rounded, spacing } from '@/constants/theme';
 
 const ERROR_MESSAGES: Record<AuthErrorCode, string> = {
   DOMAIN_NOT_ALLOWED:
@@ -34,8 +35,16 @@ export function AuthErrorMessage({ code, message, onDismiss }: Props) {
       accessibilityLiveRegion="assertive"
       accessibilityRole="alert"
     >
-      <Text style={styles.text}>{text}</Text>
-      <Pressable onPress={onDismiss} accessibilityLabel="Dismiss error" style={styles.dismiss}>
+      <View style={styles.content}>
+        <View style={styles.errorIndicator} />
+        <Text style={styles.text}>{text}</Text>
+      </View>
+      <Pressable
+        onPress={onDismiss}
+        accessibilityLabel="Dismiss error"
+        style={styles.dismiss}
+        hitSlop={8}
+      >
         <Text style={styles.dismissText}>✕</Text>
       </Pressable>
     </View>
@@ -46,25 +55,42 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fce8e6',
-    borderColor: '#f28b82',
+    justifyContent: 'space-between',
+    backgroundColor: colors.errorBg,
+    borderColor: colors.errorBorder,
     borderWidth: 1,
-    borderRadius: 8,
-    padding: 14,
-    gap: 8,
+    borderRadius: rounded.md,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    width: '100%',
+    gap: spacing.sm,
+  },
+  content: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  errorIndicator: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.error,
   },
   text: {
     flex: 1,
-    color: '#c5221f',
-    fontSize: 14,
-    lineHeight: 20,
+    color: colors.error,
+    fontFamily: fonts.sans,
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '400',
   },
   dismiss: {
-    padding: 4,
+    padding: spacing.xxs,
   },
   dismissText: {
-    color: '#c5221f',
-    fontSize: 16,
+    color: colors.error,
+    fontSize: 14,
     fontWeight: '600',
   },
 });

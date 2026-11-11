@@ -5,8 +5,10 @@ import {
   ActivityIndicator,
   StyleSheet,
   View,
+  Image,
   type ViewStyle,
 } from 'react-native';
+import { colors, fonts, rounded, spacing } from '@/constants/theme';
 
 interface Props {
   onPress: () => void;
@@ -22,18 +24,22 @@ export function GoogleSignInButton({ onPress, isLoading = false, style }: Props)
       disabled={isLoading}
       accessibilityLabel="Continue with Google"
       accessibilityRole="button"
-      activeOpacity={0.85}
+      activeOpacity={0.88}
     >
       {isLoading ? (
-        <ActivityIndicator color="#444" size="small" />
+        <ActivityIndicator color={colors.onPrimary} size="small" />
       ) : (
-        <View style={styles.googleIcon}>
-          {/* Simple coloured G mark — replace with an SVG asset if desired */}
-          <Text style={styles.googleLetter}>G</Text>
+        <View style={styles.iconCircle}>
+          <Image
+            source={require('@assets/images/google.png')}
+            style={styles.googleIcon}
+            resizeMode="contain"
+            accessibilityLabel="Google icon"
+          />
         </View>
       )}
       <Text style={styles.label}>
-        {isLoading ? 'Signing in…' : 'Continue with Google'}
+        {isLoading ? 'Authenticating…' : 'Continue with Google'}
       </Text>
     </TouchableOpacity>
   );
@@ -44,39 +50,34 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#dadce0',
-    borderRadius: 8,
+    backgroundColor: colors.primary,
+    borderRadius: rounded.full,
     paddingVertical: 14,
-    paddingHorizontal: 24,
-    gap: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    paddingHorizontal: spacing.lg,
+    gap: spacing.sm,
+    width: '100%',
+    minHeight: 48,
   },
   buttonDisabled: {
-    opacity: 0.6,
+    opacity: 0.7,
   },
-  googleIcon: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#4285F4',
+  iconCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  googleLetter: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '700',
+  googleIcon: {
+    width: 15,
+    height: 15,
   },
   label: {
-    fontSize: 16,
+    fontFamily: fonts.sans,
+    fontSize: 15,
     fontWeight: '600',
-    color: '#3c4043',
-    letterSpacing: 0.1,
+    color: colors.onPrimary,
+    letterSpacing: 0.2,
   },
 });

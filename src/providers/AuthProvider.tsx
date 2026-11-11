@@ -37,7 +37,7 @@ const initial: AuthState = { user: null, isLoading: true, error: null };
 // ─── Context ──────────────────────────────────────────────────────────────────
 
 interface AuthContextValue extends AuthState {
-  signIn: () => Promise<void>;
+  signIn: (onVerified?: (user: AppUser) => Promise<void> | void) => Promise<void>;
   signOut: () => Promise<void>;
   clearError: () => void;
 }
@@ -68,29 +68,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })();
   }, []);
 
-  const signIn = useCallback(async () => {
-    dispatch({ type: 'LOADING' });
-    try {
-      const idToken = await getGoogleIdToken();
-      if (idToken === null) {
-        // User cancelled — silently return to idle
-        dispatch({ type: 'CLEAR' });
-        return;
+  const signIn = useCallback(
+    async (onVerified?: (user: AppUser) => Promise<void> | void) => {
+      dispatch({ type: 'LOADING' });
+      try {
+        const idToken = await getGoogleIdToken();
+        if (idToken === null) {
+          // User cancelled — silently return to idle
+          dispatch({ type: 'CLEAR' });
+          return;
+        }
+        const { user } = await authApi.signIn(idToken);
+        await markSessionExists();
+        if (onVerified) {
+          await onVerified(user);
+        }
+        dispatch({ type: 'SET_USER', payload: user });
+      } catch (err: unknown) {
+        const e = err as { code?: string; message?: string };
+        dispatch({
+          type: 'SET_ERROR',
+          payload: {
+            code: (e.code as AuthErrorCode) ?? 'UNKNOWN',
+            message: e.message ?? 'An unexpected error occurred.',
+          },
+        });
       }
-      const { user } = await authApi.signIn(idToken);
-      await markSessionExists();
-      dispatch({ type: 'SET_USER', payload: user });
-    } catch (err: unknown) {
-      const e = err as { code?: string; message?: string };
-      dispatch({
-        type: 'SET_ERROR',
-        payload: {
-          code: (e.code as AuthErrorCode) ?? 'UNKNOWN',
-          message: e.message ?? 'An unexpected error occurred.',
-        },
-      });
-    }
-  }, []);
+    },
+    [],
+  );
 
   const signOut = useCallback(async () => {
     try { await authApi.signOut(); } catch { /* best-effort */ }

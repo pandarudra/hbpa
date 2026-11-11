@@ -9,149 +9,392 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { useAuth } from '@/providers/AuthProvider';
+import { useToast } from '@/providers/ToastProvider';
 import { Avatar } from '@/components/common/Avatar';
 import { RoleBadge } from '@/features/dashboard/components/RoleBadge';
+import { colors, fonts, rounded, spacing, shadows } from '@/constants/theme';
 
 export default function DashboardScreen() {
   const { user, signOut } = useAuth();
+  const { showToast } = useToast();
   const { width } = useWindowDimensions();
-  const isWide = width > 600;
+  const isWide = width > 640;
 
-  // ProtectedLayout already guarantees user is non-null here
   if (!user) return null;
 
+  const handleSignOut = async () => {
+    showToast({
+      type: 'info',
+      message: 'Signed out of Horizon workspace.',
+    });
+    await signOut();
+  };
+
+  const firstName = user.name ? user.name.split(' ')[0] : 'Member';
+
   const memberSince = user.createdAt
-    ? new Date(user.createdAt).toLocaleDateString('en-IN', {
-        day: 'numeric', month: 'long', year: 'numeric',
+    ? new Date(user.createdAt).toLocaleDateString('en-US', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
       })
     : '—';
 
   const lastLogin = user.lastLoginAt
-    ? new Date(user.lastLoginAt).toLocaleDateString('en-IN', {
-        day: 'numeric', month: 'long', year: 'numeric',
+    ? new Date(user.lastLoginAt).toLocaleDateString('en-US', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
       })
     : '—';
 
+  const emailDomain = user.email ? user.email.split('@')[1] ?? '' : '';
+
   return (
     <SafeAreaView style={styles.safe}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>HB Plus</Text>
-        <View style={styles.headerRight}>
-          <Avatar uri={user.avatarUrl} name={user.name} size={32} />
+      {/* Navigation Bar (nav-bar) */}
+      <View style={styles.navBar}>
+        <View style={styles.navLeft}>
+          <View style={styles.navEmblem}>
+            <Text style={styles.navEmblemText}>H</Text>
+          </View>
+          <Text style={styles.navTitle}>HORIZON</Text>
+        </View>
+
+        <View style={styles.navRight}>
+          <Avatar uri={user.avatarUrl} name={user.name} size={34} />
           <TouchableOpacity
-            onPress={signOut}
-            style={styles.logoutBtn}
-            accessibilityLabel="Logout"
+            onPress={handleSignOut}
+            style={styles.navLogoutBtn}
+            accessibilityLabel="Sign out"
             accessibilityRole="button"
+            activeOpacity={0.8}
           >
-            <Text style={styles.logoutBtnText}>Logout</Text>
+            <Text style={styles.navLogoutText}>Sign Out</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={[styles.scroll, isWide && styles.scrollWide]}>
-        {/* Profile card */}
-        <View style={styles.card}>
-          <Avatar uri={user.avatarUrl} name={user.name} size={72} />
-          <Text style={styles.welcome}>Welcome, {user.name.split(' ')[0]}!</Text>
-          <Text style={styles.email}>{user.email}</Text>
-          <RoleBadge role={user.role} />
+      <ScrollView
+        contentContainerStyle={[styles.scroll, isWide && styles.scrollWide]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Editorial Hero Statement (hero) */}
+        <View style={styles.heroSection}>
+          <View style={styles.heroEyebrow}>
+            <View style={styles.heroDot} />
+            <Text style={styles.heroEyebrowText}>WORKSPACE PROFILE</Text>
+          </View>
+          <Text style={styles.heroHeading}>Welcome back, {firstName}.</Text>
+          <Text style={styles.heroSubheading}>
+            Your official domain session is active and authenticated.
+          </Text>
         </View>
 
-        {/* Stats card */}
+        {/* Member Profile Card (feature-card) */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Account Details</Text>
-          <StatRow label="Member since" value={memberSince} />
-          <StatRow label="Last login" value={lastLogin} />
-          <StatRow label="Status" value={user.status} />
+          <View style={styles.profileHeader}>
+            <Avatar uri={user.avatarUrl} name={user.name} size={68} />
+            <View style={styles.profileMeta}>
+              <Text style={styles.userName}>{user.name || 'Organization Member'}</Text>
+              <Text style={styles.userEmail}>{user.email}</Text>
+              <View style={styles.badgeRow}>
+                <RoleBadge role={user.role} />
+              </View>
+            </View>
+          </View>
         </View>
 
-        {/* Logout button */}
+        {/* Telemetry & Details Card (feature-card) */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Session & Account Telemetry</Text>
+
+          <StatRow
+            label="Domain Verification"
+            value={`@${emailDomain}`}
+            isAccent
+          />
+          <StatRow
+            label="Account Status"
+            value={user.status === 'ACTIVE' ? 'Active' : user.status}
+            statusDot={user.status === 'ACTIVE'}
+          />
+          <StatRow label="Identity Provider" value="Google Workspace" />
+          <StatRow label="Member Since" value={memberSince} />
+          <StatRow label="Last Authenticated" value={lastLogin} isLast />
+        </View>
+
+        {/* Action Button: button-outline-stone */}
         <TouchableOpacity
-          style={styles.logoutFull}
-          onPress={signOut}
-          accessibilityLabel="Sign out"
+          style={styles.signOutButton}
+          onPress={handleSignOut}
+          accessibilityLabel="Sign out of Horizon"
           accessibilityRole="button"
+          activeOpacity={0.85}
         >
-          <Text style={styles.logoutFullText}>Sign Out</Text>
+          <Text style={styles.signOutButtonText}>Sign Out of Horizon</Text>
         </TouchableOpacity>
+
+        {/* Quiet Editorial Footer */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>
+            Horizon Zero-Trust Workspace · Cryptographically Verified
+          </Text>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function StatRow({ label, value }: { label: string; value: string }) {
+function StatRow({
+  label,
+  value,
+  statusDot = false,
+  isAccent = false,
+  isLast = false,
+}: {
+  label: string;
+  value: string;
+  statusDot?: boolean;
+  isAccent?: boolean;
+  isLast?: boolean;
+}) {
   return (
-    <View style={styles.statRow}>
+    <View style={[styles.statRow, isLast && styles.statRowLast]}>
       <Text style={styles.statLabel}>{label}</Text>
-      <Text style={styles.statValue}>{value}</Text>
+      <View style={styles.statValueGroup}>
+        {statusDot && <View style={styles.statusDot} />}
+        <Text
+          style={[
+            styles.statValue,
+            isAccent && styles.statValueAccent,
+          ]}
+        >
+          {value}
+        </Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#f8f9fa' },
-  header: {
+  safe: {
+    flex: 1,
+    backgroundColor: colors.canvas,
+  },
+  navBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    backgroundColor: '#fff',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    backgroundColor: colors.canvas,
     borderBottomWidth: 1,
-    borderBottomColor: '#e8eaed',
+    borderBottomColor: colors.hairline,
   },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#1A73E8' },
-  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  logoutBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 8,
-    backgroundColor: '#fce8e6',
-  },
-  logoutBtnText: { color: '#c5221f', fontWeight: '600', fontSize: 13 },
-
-  scroll: { padding: 20, gap: 16 },
-  scrollWide: { maxWidth: 540, alignSelf: 'center', width: '100%' },
-
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 14,
-    padding: 24,
+  navLeft: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-    width: '100%',
+    gap: spacing.xs,
   },
-  cardTitle: { fontSize: 14, fontWeight: '600', color: '#5f6368', alignSelf: 'flex-start' },
-
-  welcome: { fontSize: 22, fontWeight: '700', color: '#202124' },
-  email: { fontSize: 14, color: '#5f6368' },
-
+  navEmblem: {
+    width: 26,
+    height: 26,
+    borderRadius: rounded.full,
+    backgroundColor: colors.stone,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navEmblemText: {
+    color: colors.onStone,
+    fontFamily: fonts.serif,
+    fontSize: 13,
+    fontWeight: '300',
+    marginTop: -1,
+  },
+  navTitle: {
+    fontFamily: fonts.serif,
+    fontSize: 15,
+    fontWeight: '300',
+    letterSpacing: 2,
+    color: colors.stone,
+    textTransform: 'uppercase',
+  },
+  navRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  navLogoutBtn: {
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: spacing.xxs + 2,
+    borderRadius: rounded.full,
+    borderWidth: 1,
+    borderColor: colors.stone,
+    backgroundColor: colors.canvas,
+  },
+  navLogoutText: {
+    color: colors.stone,
+    fontFamily: fonts.sans,
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.3,
+  },
+  scroll: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xl,
+    gap: spacing.lg,
+  },
+  scrollWide: {
+    maxWidth: 580,
+    width: '100%',
+    alignSelf: 'center',
+    paddingVertical: spacing.xxl,
+  },
+  heroSection: {
+    gap: spacing.xs,
+    paddingVertical: spacing.xs,
+  },
+  heroEyebrow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    alignSelf: 'flex-start',
+  },
+  heroDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.olive,
+  },
+  heroEyebrowText: {
+    fontFamily: fonts.sans,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    color: colors.stone,
+    textTransform: 'uppercase',
+  },
+  heroHeading: {
+    fontFamily: fonts.serif,
+    fontSize: 32,
+    fontWeight: '300',
+    color: colors.ink,
+    letterSpacing: -0.3,
+    lineHeight: 38,
+  },
+  heroSubheading: {
+    fontFamily: fonts.sans,
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.stone,
+  },
+  card: {
+    backgroundColor: colors.surface,
+    borderRadius: rounded.lg,
+    borderWidth: 1,
+    borderColor: colors.hairline,
+    padding: spacing.xl,
+    gap: spacing.md,
+    ...shadows.card,
+  },
+  profileHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.lg,
+  },
+  profileMeta: {
+    flex: 1,
+    gap: spacing.xxs,
+  },
+  userName: {
+    fontFamily: fonts.sans,
+    fontSize: 19,
+    fontWeight: '600',
+    color: colors.ink,
+    letterSpacing: 0.1,
+  },
+  userEmail: {
+    fontFamily: fonts.sans,
+    fontSize: 14,
+    color: colors.stone,
+  },
+  badgeRow: {
+    marginTop: spacing.xxs,
+  },
+  cardTitle: {
+    fontFamily: fonts.sans,
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    color: colors.ash,
+    textTransform: 'uppercase',
+    marginBottom: spacing.xxs,
+  },
   statRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '100%',
-    paddingVertical: 6,
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f3f4',
+    borderBottomColor: colors.hairline,
   },
-  statLabel: { fontSize: 14, color: '#5f6368' },
-  statValue: { fontSize: 14, fontWeight: '500', color: '#202124' },
-
-  logoutFull: {
-    backgroundColor: '#fff',
+  statRowLast: {
+    borderBottomWidth: 0,
+    paddingBottom: 0,
+  },
+  statLabel: {
+    fontFamily: fonts.sans,
+    fontSize: 14,
+    color: colors.stone,
+  },
+  statValueGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.forest,
+  },
+  statValue: {
+    fontFamily: fonts.sans,
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.ink,
+  },
+  statValueAccent: {
+    color: colors.primary,
+    fontWeight: '600',
+  },
+  signOutButton: {
+    backgroundColor: colors.canvas,
     borderWidth: 1,
-    borderColor: '#dadce0',
-    borderRadius: 10,
+    borderColor: colors.stone,
+    borderRadius: rounded.full,
     paddingVertical: 14,
     alignItems: 'center',
+    justifyContent: 'center',
     width: '100%',
+    minHeight: 48,
   },
-  logoutFullText: { fontSize: 15, fontWeight: '600', color: '#c5221f' },
+  signOutButtonText: {
+    fontFamily: fonts.sans,
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.stone,
+    letterSpacing: 0.3,
+  },
+  footer: {
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+  },
+  footerText: {
+    fontFamily: fonts.sans,
+    fontSize: 12,
+    color: colors.ash,
+    letterSpacing: 0.2,
+  },
 });
