@@ -10,7 +10,7 @@ const sessionOptions = {
   cookieOptions: {
     httpOnly: true,
     secure: env.NODE_ENV === 'production',
-    sameSite: (env.NODE_ENV === 'production' ? 'none' : 'lax') as const,
+    sameSite: (env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
     maxAge: env.SESSION_MAX_AGE,
   },
 };
